@@ -6,7 +6,7 @@ import com.facebook.react.bridge.ReactMethod
 import com.facebook.react.bridge.Promise
 
 class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
-    private val keystore = SecureKeystoreImpl()
+    private val keystore = SecureKeystoreImpl(KeyGeneratorImpl(), CipherBoxImpl())
     private val deviceCapability = DeviceCapability(keystore)
     private val logTag = util.getLogTag(javaClass.simpleName)
 
