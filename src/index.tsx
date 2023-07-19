@@ -18,5 +18,4 @@ const SecureKeystore: SecureKeystoreModule = NativeModules.SecureKeystore
       }
     );
 
-
 export default SecureKeystore;

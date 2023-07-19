@@ -1,18 +1,29 @@
+import { useEffect, useState } from 'react';
 import * as React from 'react';
 
 import { StyleSheet, View, Text } from 'react-native';
-import { multiply } from 'react-native-secure-keystore';
+import SecureStore from 'react-native-secure-keystore';
 
 export default function App() {
-  const [result, setResult] = React.useState<number | undefined>();
+  const [supportsHardware, setSupportsHardware] = useState<
+    boolean | undefined
+  >();
 
-  React.useEffect(() => {
-    multiply(3, 7).then(setResult);
-  }, []);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => {
+    const supHardware = SecureStore.deviceSupportsHardware();
+    setSupportsHardware(supHardware);
+    console.log('is hardware supported: ' + supHardware);
+    const encryptData = SecureStore.encryptData('key-alias', 'Hi I am Tilak');
+    console.log('encryptedText: ' + encryptData);
+    console.log(
+      'decryptedText: ' + SecureStore.decryptData('key-alias', encryptData)
+    );
+  });
 
   return (
     <View style={styles.container}>
-      <Text>Result: {result}</Text>
+      <Text>Has HardWare Storage: {supportsHardware}</Text>
     </View>
   );
 }

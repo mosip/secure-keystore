@@ -8,6 +8,7 @@ import com.facebook.react.bridge.Promise
 class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
     private val keystore = SecureKeystoreImpl()
     private val deviceCapability = DeviceCapability(keystore)
+    private val logTag = util.getLogTag(javaClass.simpleName)
 
     override fun getName(): String {
         return "SecureKeystore"
@@ -16,7 +17,19 @@ class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContext
     @ReactMethod(isBlockingSynchronousMethod = true)
     fun deviceSupportsHardware(): Boolean {
       val supportsHardware = deviceCapability.supportsHardwareKeyStore()
-      Log.i("keystore--","Device supports Hardware $supportsHardware")
+      Log.d(logTag,"Device supports Hardware $supportsHardware")
       return supportsHardware
+    }
+
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    fun encryptData(alias: String, data: String): String {
+      Log.d(logTag,"Encrypting data: $data")
+      return keystore.encryptData(alias, data)
+    }
+
+    @ReactMethod(isBlockingSynchronousMethod = true)
+    fun decryptData(alias: String, encryptedText: String): String {
+      Log.d(logTag,"decrypting data: $encryptedText")
+      return keystore.decryptData(alias, encryptedText)
     }
 }
