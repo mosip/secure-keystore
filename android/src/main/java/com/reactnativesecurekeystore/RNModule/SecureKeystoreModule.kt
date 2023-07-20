@@ -49,4 +49,10 @@ class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContext
     Log.d(logTag, "decrypting data: $encryptedText")
     return keystore.decryptData(alias, encryptedText)
   }
+
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  fun sign(alias: String, data: String): String {
+    Log.d(logTag, "signing data: $data")
+    return keystore.sign(alias, data)
+  }
 }

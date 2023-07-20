@@ -1,10 +1,12 @@
 package com.reactnativesecurekeystore
 
+import android.util.Base64
 import android.util.Log
 import com.reactnativesecurekeystore.exception.KeyNotFound
 import com.reactnativesecurekeystore.util.Companion.getLogTag
 import java.security.Key
 import java.security.KeyStore
+import java.security.PrivateKey
 
 
 class SecureKeystoreImpl(private val keyGenerator: KeyGenerator, private val cipherBox: CipherBox) : SecureKeystore {
@@ -49,6 +51,14 @@ class SecureKeystoreImpl(private val keyGenerator: KeyGenerator, private val cip
     val decryptedData = cipherBox.decryptData(key, encryptedText)
 
     return String(decryptedData)
+  }
+
+  override fun sign(alias: String, data: String): String {
+    val key = getKeyOrThrow(alias) as PrivateKey
+
+    val signature = cipherBox.sign(key, data)
+
+    return Base64.encodeToString(signature, Base64.DEFAULT)
   }
 
   private fun getKeyOrThrow(alias: String): Key {

@@ -21,13 +21,12 @@ class PemWriter {
     }
 
     private fun toPemString(key: Key, keyType: KeyType): String {
-      val encodedKey = Base64.encodeToString(key.encoded, Base64.NO_WRAP)
+      val encodedKey = Base64.encodeToString(key.encoded, Base64.DEFAULT)
       val pemStringBuilder = StringBuilder();
 
       pemStringBuilder.append(preEncapsulationBoundary(key.algorithm, keyType.text))
       pemStringBuilder.appendLine()
       pemStringBuilder.append(encodedKey)
-      pemStringBuilder.appendLine()
       pemStringBuilder.append(postEncapsulationBoundary(key.algorithm, keyType.text))
 
       return pemStringBuilder.toString()

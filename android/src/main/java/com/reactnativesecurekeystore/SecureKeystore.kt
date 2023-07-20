@@ -6,4 +6,5 @@ interface SecureKeystore {
   fun encryptData(alias: String, data: String): String
   fun decryptData(alias: String, encryptedText: String): String
   fun removeKey(alias: String)
+  fun sign(alias: String, data: String): String
 }
