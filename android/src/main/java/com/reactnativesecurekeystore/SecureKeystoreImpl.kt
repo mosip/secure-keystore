@@ -1,17 +1,11 @@
 package com.reactnativesecurekeystore
 
-import android.security.keystore.KeyProperties
 import android.util.Log
 import com.reactnativesecurekeystore.exception.KeyNotFound
 import com.reactnativesecurekeystore.util.Companion.getLogTag
-import java.security.GeneralSecurityException
 import java.security.Key
-import java.security.KeyPair
 import java.security.KeyStore
-import javax.crypto.SecretKey
 
-const val CIPHER_ALGORITHM =
-  "${KeyProperties.KEY_ALGORITHM_AES}/${KeyProperties.BLOCK_MODE_GCM}/${KeyProperties.ENCRYPTION_PADDING_NONE}"
 
 class SecureKeystoreImpl(private val keyGenerator: KeyGenerator, private val cipherBox: CipherBox) : SecureKeystore {
   private var ks: KeyStore = KeyStore.getInstance(KEYSTORE_TYPE)
@@ -22,64 +16,47 @@ class SecureKeystoreImpl(private val keyGenerator: KeyGenerator, private val cip
   }
 
   /**  Generate secret key and store it in AndroidKeystore */
-  override fun generateKey(alias: String): SecretKey {
-    return keyGenerator.generateKey(alias)
+  override fun generateKey(alias: String) {
+    keyGenerator.generateKey(alias)
   }
 
   /** Generate a new key pair */
-  override fun generateKeyPair(alias: String): KeyPair {
-    return keyGenerator.generateKeyPair(alias)
+  override fun generateKeyPair(alias: String): String {
+    val keyPair = keyGenerator.generateKeyPair(alias)
+
+    return PemWriter.toPemString(keyPair.public)
   }
 
   /** Remove key with provided name from security storage.  */
   override fun removeKey(alias: String) {
-    try {
-      if (ks.containsAlias(alias)) {
-        ks.deleteEntry(alias)
-      }
-    } catch (ignored: GeneralSecurityException) {
-      /* only one exception can be raised by code: 'KeyStore is not loaded' */
+    if (ks.containsAlias(alias)) {
+      ks.deleteEntry(alias)
     }
   }
 
   override fun encryptData(alias: String, data: String): String {
-    try {
-      val key = getOrGenerateKey(ks, alias)
+    Log.i(logTag, ks.aliases().toList().toString())
+    val key = getKeyOrThrow(alias)
 
-      val encryptedOutput = cipherBox.encryptData(key, data)
+    val encryptedOutput = cipherBox.encryptData(key, data)
 
-      return encryptedOutput.toString()
-    } catch (e: GeneralSecurityException) {
-      Log.i(logTag, "exception in encryptData: $e")
-      throw  e
-      /* only one exception can be raised by code: 'KeyStore is not loaded' */
-    }
+    return encryptedOutput.toString()
   }
 
   override fun decryptData(alias: String, encryptedText: String): String {
-    try {
-      if(!ks.containsAlias(alias)) {
-        throw KeyNotFound("Key not found for the alias: $alias")
-      }
+    val key = getKeyOrThrow(alias)
 
-      val key = ks.getKey(alias, null)
+    val decryptedData = cipherBox.decryptData(key, encryptedText)
 
-      val decryptedData = cipherBox.decryptData(key, encryptedText)
-
-      return String(decryptedData)
-    } catch (e: GeneralSecurityException) {
-      Log.i(logTag, "exception in decryptData: $e")
-      throw  e
-      /* only one exception can be raised by code: 'KeyStore is not loaded' */
-    }
+    return String(decryptedData)
   }
 
-  private fun getOrGenerateKey(ks: KeyStore, alias: String): Key {
-    if (ks.containsAlias(alias)) {
-      return ks.getKey(alias, null)
+  private fun getKeyOrThrow(alias: String): Key {
+    if (!ks.containsAlias(alias)) {
+      throw KeyNotFound("Key not found for the alias: $alias")
     }
 
-    Log.i(logTag, "Generating new key")
-    return generateKey(alias)
+    //TODO: Check the type of key to be secret key not key pair
+    return ks.getKey(alias, null)
   }
 }

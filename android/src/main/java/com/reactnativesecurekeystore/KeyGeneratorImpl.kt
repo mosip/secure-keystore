@@ -1,15 +1,17 @@
 package com.reactnativesecurekeystore
 
 import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
+import android.security.keystore.KeyProperties.*
 import java.security.KeyPair
 import java.security.KeyPairGenerator
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 
-class KeyGeneratorImpl: com.reactnativesecurekeystore.KeyGenerator {
-  private val keyGenerator = KeyGenerator.getInstance(KeyProperties.KEY_ALGORITHM_AES, KEYSTORE_TYPE)
-  private val keyPairGenerator = KeyPairGenerator.getInstance(KeyProperties.KEY_ALGORITHM_EC, KEYSTORE_TYPE)
+const val KEY_PAIR_KEY_SIZE = 4096
+
+class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
+  private val keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM_AES, KEYSTORE_TYPE)
+  private val keyPairGenerator = KeyPairGenerator.getInstance(KEY_ALGORITHM_RSA, KEYSTORE_TYPE)
 
   /**  Generate secret key and store it in AndroidKeystore */
   override fun generateKey(alias: String): SecretKey {
@@ -17,24 +19,35 @@ class KeyGeneratorImpl: com.reactnativesecurekeystore.KeyGenerator {
       getKeyGenSpecBuilder(alias).build()
     )
 
+    // Assumption: Generate Key also stores Key in Keystore
     return keyGenerator.generateKey()
   }
 
   /** Generate a new key pair */
   override fun generateKeyPair(alias: String): KeyPair {
     keyPairGenerator.initialize(
-      getKeyGenSpecBuilder(alias).build()
+      getKeyPairGenSpecBuilder(alias).build()
     )
 
     return keyPairGenerator.generateKeyPair()
   }
 
   private fun getKeyGenSpecBuilder(alias: String): KeyGenParameterSpec.Builder {
-    val purposes = KeyProperties.PURPOSE_DECRYPT or KeyProperties.PURPOSE_ENCRYPT
+    val purposes = PURPOSE_DECRYPT or PURPOSE_ENCRYPT
 
     return KeyGenParameterSpec.Builder(alias, purposes)
       .setKeySize(ENCRYPTION_KEY_SIZE)
-      .setBlockModes(KeyProperties.BLOCK_MODE_GCM)
-      .setEncryptionPaddings(KeyProperties.ENCRYPTION_PADDING_NONE)
+      .setBlockModes(BLOCK_MODE_GCM)
+      .setEncryptionPaddings(ENCRYPTION_PADDING_NONE)
+  }
+
+  private fun getKeyPairGenSpecBuilder(alias: String): KeyGenParameterSpec.Builder {
+    val purposes = PURPOSE_SIGN or PURPOSE_VERIFY
+
+    return KeyGenParameterSpec.Builder(alias, purposes)
+      .setKeySize(KEY_PAIR_KEY_SIZE)
+      .setDigests(DIGEST_SHA256, DIGEST_SHA512, DIGEST_SHA1)
+      .setEncryptionPaddings(ENCRYPTION_PADDING_RSA_PKCS1)
+      .setSignaturePaddings(SIGNATURE_PADDING_RSA_PKCS1)
   }
 }

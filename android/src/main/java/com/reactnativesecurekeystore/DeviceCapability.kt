@@ -9,7 +9,7 @@ import javax.crypto.SecretKey
 import javax.crypto.SecretKeyFactory
 
 
-class DeviceCapability(private val secureKeystore: SecureKeystore) {
+class DeviceCapability(private val secureKeystore: SecureKeystore, private val KeyGenerator: KeyGeneratorImpl) {
   private val mutex = Object()
 
   @Transient
@@ -22,7 +22,7 @@ class DeviceCapability(private val secureKeystore: SecureKeystore) {
       /** double check if it has value in sync block */
       if (isSupportsSecureHardware != null) return isSupportsSecureHardware!!.get()
       // Check the key stored in secure hardware using temporary key alias, and removed after checked
-      val key = secureKeystore.generateKey(CHECK_HARDWARE_SUPPORT_KEY_ALIAS)
+      val key = KeyGenerator.generateKey(CHECK_HARDWARE_SUPPORT_KEY_ALIAS)
       isSupportsSecureHardware =
         AtomicBoolean(getSecurityLevel(key) == DeviceSecurityLevel.SECURE_HARDWARE)
       Log.i("SecureStorage", "Device Supports Hardware $isSupportsSecureHardware")
