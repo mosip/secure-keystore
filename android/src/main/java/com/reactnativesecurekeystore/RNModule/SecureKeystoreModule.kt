@@ -22,12 +22,14 @@ class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContext
     Log.d(logTag, "Device supports Hardware $supportsHardware")
     return supportsHardware
   }
+
   @ReactMethod(isBlockingSynchronousMethod = true)
   fun hasAlias(alias: String): Boolean {
     val exists = keystore.hasAlias(alias)
     Log.d(logTag, "Alias Exist $exists")
     return exists
   }
+
   @ReactMethod(isBlockingSynchronousMethod = true)
   fun generateKey(alias: String) {
     Log.d(logTag, "Generating a key for $alias")

@@ -26,7 +26,7 @@ class SecureKeystoreImpl(private val keyGenerator: KeyGenerator, private val cip
   override fun generateKeyPair(alias: String): String {
     val keyPair = keyGenerator.generateKeyPair(alias)
 
-    return PemWriter.toPemString(keyPair.public)
+    return PemConverter(keyPair.public).toPem()
   }
 
   /** Remove key with provided name from security storage.  */

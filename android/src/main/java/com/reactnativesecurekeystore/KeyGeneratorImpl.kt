@@ -42,7 +42,7 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
   }
 
   private fun getKeyPairGenSpecBuilder(alias: String): KeyGenParameterSpec.Builder {
-    val purposes = PURPOSE_SIGN or PURPOSE_VERIFY
+    val purposes = PURPOSE_ENCRYPT or PURPOSE_DECRYPT or PURPOSE_SIGN or PURPOSE_VERIFY
 
     return KeyGenParameterSpec.Builder(alias, purposes)
       .setKeySize(KEY_PAIR_KEY_SIZE)
