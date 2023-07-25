@@ -35,7 +35,12 @@ class SecureKeystoreImpl(private val keyGenerator: KeyGenerator, private val cip
       ks.deleteEntry(alias)
     }
   }
-
+  override fun hasAlias(alias: String): Boolean {
+    if (ks.containsAlias(alias)) {
+      return true
+    }
+    return false
+  }
   override fun encryptData(alias: String, data: String): String {
     Log.i(logTag, ks.aliases().toList().toString())
     val key = getKeyOrThrow(alias)
