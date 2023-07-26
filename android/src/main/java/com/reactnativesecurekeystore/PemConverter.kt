@@ -21,13 +21,11 @@ class PemConverter(private val publicKey: PublicKey) {
     return stringWriter.toString()
   }
 
-
   private fun publicKeyToPkcs1(publicKey: PublicKey): ByteArray {
     val spkInfo = SubjectPublicKeyInfo.getInstance(publicKey.encoded)
     val primitive = spkInfo.parsePublicKey()
     return primitive.encoded
   }
-
 
   private enum class KeyType(val text: String) {
     PUBLIC("PUBLIC KEY"),

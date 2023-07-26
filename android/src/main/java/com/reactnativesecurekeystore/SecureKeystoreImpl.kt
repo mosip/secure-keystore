@@ -58,6 +58,14 @@ class SecureKeystoreImpl(private val keyGenerator: KeyGenerator, private val cip
     return String(decryptedData)
   }
 
+  override fun generateHmacSha(alias: String, data: String): String {
+    val key = getKeyOrThrow(alias)
+
+    val hmacSha = cipherBox.generateHmacSha(key, data)
+
+    return String(hmacSha)
+  }
+
   override fun sign(alias: String, data: String): String {
     val key = getKeyOrThrow(alias) as PrivateKey
 

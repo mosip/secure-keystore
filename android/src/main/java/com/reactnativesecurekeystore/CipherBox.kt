@@ -8,4 +8,5 @@ interface CipherBox {
   fun encryptData(key: Key, data: String): EncryptedOutput
   fun decryptData(key: Key, encryptedText: String): ByteArray
   fun sign(key: PrivateKey, data: String): ByteArray
+  fun generateHmacSha(key: Key, data: String): ByteArray
 }
