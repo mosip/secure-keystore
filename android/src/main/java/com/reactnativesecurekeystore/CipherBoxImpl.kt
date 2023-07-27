@@ -4,7 +4,6 @@ import android.security.keystore.KeyProperties
 import com.reactnativesecurekeystore.dto.EncryptedOutput
 import java.security.Key
 import java.security.MessageDigest
-import java.security.NoSuchAlgorithmException
 import java.security.PrivateKey
 import java.security.Signature
 import javax.crypto.Cipher
@@ -28,9 +27,7 @@ class CipherBoxImpl : CipherBox {
   }
 
   override fun sign(key: PrivateKey, data: String): ByteArray {
-    val messageDigest = MessageDigest.getInstance(KeyProperties.DIGEST_SHA256)
-    val hash = messageDigest.digest(data.toByteArray())
-
+    val hash = data.toByteArray(charset("UTF8"))
     val signature = Signature.getInstance(SIGN_ALGORITHM).run {
       initSign(key)
       update(hash)
