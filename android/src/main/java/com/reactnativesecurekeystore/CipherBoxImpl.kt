@@ -46,9 +46,8 @@ class CipherBoxImpl : CipherBox {
     return mac.doFinal()
   }
 
-  override fun decryptData(key: Key, encryptedText: String): ByteArray {
+  override fun decryptData(key: Key, encryptedOutput: EncryptedOutput): ByteArray {
     val cipher = Cipher.getInstance(CIPHER_ALGORITHM)
-    val encryptedOutput = EncryptedOutput(encryptedText);
 
     val spec = GCMParameterSpec(GCM_TAG_LEN, encryptedOutput.iv)
     cipher.init(Cipher.DECRYPT_MODE, key, spec)

@@ -20,4 +20,10 @@ class EncryptedOutput {
   override fun toString(): String {
     return Base64.encodeToString(iv, Base64.DEFAULT) + '_' + Base64.encodeToString(encryptedData, Base64.DEFAULT)
   }
+
+  companion object {
+    fun validate(encryptedOutput: String): Boolean {
+      return encryptedOutput.split("_").size > 2
+    }
+  }
 }

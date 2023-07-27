@@ -2,6 +2,7 @@ package com.reactnativesecurekeystore
 
 import android.util.Base64
 import android.util.Log
+import com.reactnativesecurekeystore.dto.EncryptedOutput
 import com.reactnativesecurekeystore.exception.KeyNotFound
 import com.reactnativesecurekeystore.util.Companion.getLogTag
 import java.security.Key
@@ -52,8 +53,12 @@ class SecureKeystoreImpl(private val keyGenerator: KeyGenerator, private val cip
 
   override fun decryptData(alias: String, encryptedText: String): String {
     val key = getKeyOrThrow(alias)
+    if(!EncryptedOutput.validate(encryptedText)) {
+      throw RuntimeException("Invalid Encrypted Text received")
+    }
 
-    val decryptedData = cipherBox.decryptData(key, encryptedText)
+    val encryptedOutput = EncryptedOutput(encryptedText)
+    val decryptedData = cipherBox.decryptData(key, encryptedOutput)
 
     return String(decryptedData)
   }

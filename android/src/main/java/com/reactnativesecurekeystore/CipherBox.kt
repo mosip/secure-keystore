@@ -6,7 +6,7 @@ import java.security.PrivateKey
 
 interface CipherBox {
   fun encryptData(key: Key, data: String): EncryptedOutput
-  fun decryptData(key: Key, encryptedText: String): ByteArray
+  fun decryptData(key: Key, encryptedText: EncryptedOutput): ByteArray
   fun sign(key: PrivateKey, data: String): ByteArray
   fun generateHmacSha(key: Key, data: String): ByteArray
 }
