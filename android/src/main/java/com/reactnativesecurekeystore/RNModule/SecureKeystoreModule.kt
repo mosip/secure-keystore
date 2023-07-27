@@ -59,9 +59,9 @@ class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContext
   }
 
   @ReactMethod(isBlockingSynchronousMethod = true)
-  fun generateHmacSha(alias: String, data: String): String {
+  fun generateHmacSha(data: String): String {
     Log.d(logTag, "generating HACH Sha for data: $data")
-    return keystore.generateHmacSha(alias, data)
+    return keystore.generateHmacSha(data)
   }
 
   @ReactMethod(isBlockingSynchronousMethod = true)

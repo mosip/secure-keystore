@@ -5,6 +5,6 @@ export interface SecureKeystoreModule {
   hasAlias: (alias: string) => boolean;
   encryptData: (alias: string, data: string) => string;
   decryptData: (alias: string, encryptedText: string) => string;
-  generateHmacSha: (alias: string, data: string) => string;
+  generateHmacSha: (data: string) => string;
   sign: (alias: string, data: string) => string;
 }
