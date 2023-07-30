@@ -1,4 +1,4 @@
-package com.reactnativesecurekeystore
+package com.reactnativesecurekeystore.common
 
 class util {
   companion object {

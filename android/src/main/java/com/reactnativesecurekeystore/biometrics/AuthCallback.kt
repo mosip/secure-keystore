@@ -2,6 +2,7 @@ import android.hardware.biometrics.BiometricPrompt
 import android.hardware.biometrics.BiometricPrompt.CryptoObject
 import android.os.Build
 import androidx.annotation.RequiresApi
+import com.reactnativesecurekeystore.biometrics.Biometrics
 
 
 @RequiresApi(Build.VERSION_CODES.P)

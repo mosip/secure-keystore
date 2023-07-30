@@ -1,6 +1,6 @@
 package com.reactnativesecurekeystore
 
-import Biometrics
+import com.reactnativesecurekeystore.biometrics.Biometrics
 import android.os.Build
 import android.util.Log
 import androidx.annotation.RequiresApi
@@ -8,6 +8,7 @@ import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
+import com.reactnativesecurekeystore.common.util
 
 @RequiresApi(Build.VERSION_CODES.P)
 class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {

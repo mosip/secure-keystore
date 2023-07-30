@@ -1,15 +1,16 @@
 package com.reactnativesecurekeystore
 
-import Biometrics
+import com.reactnativesecurekeystore.biometrics.Biometrics
 import android.hardware.biometrics.BiometricPrompt.CryptoObject
 import android.os.Build
 import android.util.Base64
 import android.util.Log
 import androidx.annotation.RequiresApi
+import com.reactnativesecurekeystore.common.PemConverter
 import com.reactnativesecurekeystore.dto.EncryptedOutput
 import com.reactnativesecurekeystore.exception.InvalidEncryptionText
 import com.reactnativesecurekeystore.exception.KeyNotFound
-import com.reactnativesecurekeystore.util.Companion.getLogTag
+import com.reactnativesecurekeystore.common.util.Companion.getLogTag
 import java.security.Key
 import java.security.KeyStore
 import java.security.PrivateKey

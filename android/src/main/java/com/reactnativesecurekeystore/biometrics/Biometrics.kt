@@ -1,4 +1,8 @@
+package com.reactnativesecurekeystore.biometrics
+
+import BiometricPromptAuthCallback
 import android.content.Context
+import android.hardware.biometrics.BiometricManager
 import android.hardware.biometrics.BiometricPrompt
 import android.os.Build
 import android.os.CancellationSignal
@@ -43,11 +47,18 @@ class Biometrics(
       }
   }
 
-  private fun buildBiometricPrompt(executor: Executor, onFailure: (errorCode: ErrorCode, errString: String) -> Unit) = BiometricPrompt.Builder(context)
-    .setTitle("Unlock App")
-    .setDescription("Enter phone screen lock pattern, PIN< password or fingerprint")
-    .setNegativeButton("Cancel", executor) { _, _ ->
-      onFailure(ErrorCode.CANCELLED_BY_USER, "Cancelled by clicking on negative button")
+  private fun buildBiometricPrompt(executor: Executor, onFailure: (errorCode: ErrorCode, errString: String) -> Unit): BiometricPrompt {
+    val builder = BiometricPrompt.Builder(context)
+      .setTitle("Unlock App")
+      .setDescription("Enter phone screen lock pattern, PIN< password or fingerprint")
+      .setNegativeButton("Cancel", executor) { _, _ ->
+        onFailure(ErrorCode.CANCELLED_BY_USER, "Cancelled by clicking on negative button")
+      }
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+      builder.setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
     }
-    .build()
+
+    return builder.build()
+  }
 }

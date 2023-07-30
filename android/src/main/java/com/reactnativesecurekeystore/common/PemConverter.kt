@@ -1,4 +1,4 @@
-package com.reactnativesecurekeystore
+package com.reactnativesecurekeystore.common
 
 import org.spongycastle.asn1.x509.SubjectPublicKeyInfo
 import org.spongycastle.util.io.pem.PemObject
