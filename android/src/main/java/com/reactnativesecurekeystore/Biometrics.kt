@@ -13,10 +13,15 @@ import java.util.concurrent.Executors
 class Biometrics(
   private val context: Context) {
 
+  enum class ErrorCode {
+    INTERNAL_ERROR,
+    CANCELLED_BY_USER,
+  }
+
   fun authenticate(
     signature: Signature,
     onSuccess: (cryptoObject: BiometricPrompt.CryptoObject) -> Unit,
-    onFailure: (errorCode: Int, errString: String) -> Unit
+    onFailure: (errorCode: ErrorCode, errString: String) -> Unit
   ) {
       UiThreadUtil.runOnUiThread {
         try {
@@ -33,16 +38,16 @@ class Biometrics(
             authCallback,
           )
         } catch (e: Exception) {
-          onFailure(0, "Failed to display auth prompt")
+          onFailure(ErrorCode.INTERNAL_ERROR, "Failed to display auth prompt")
         }
       }
   }
 
-  private fun buildBiometricPrompt(executor: Executor, onFailure: (errorCode: Int, errString: String) -> Unit) = BiometricPrompt.Builder(context)
-    .setTitle("Unlock Inji")
+  private fun buildBiometricPrompt(executor: Executor, onFailure: (errorCode: ErrorCode, errString: String) -> Unit) = BiometricPrompt.Builder(context)
+    .setTitle("Unlock App")
     .setDescription("Enter phone screen lock pattern, PIN< password or fingerprint")
     .setNegativeButton("Cancel", executor) { _, _ ->
-      onFailure(1, "Cancelled by clicking on negative button")
+      onFailure(ErrorCode.CANCELLED_BY_USER, "Cancelled by clicking on negative button")
     }
     .build()
 }

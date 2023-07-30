@@ -7,12 +7,12 @@ import androidx.annotation.RequiresApi
 @RequiresApi(Build.VERSION_CODES.P)
 class BiometricPromptAuthCallback (
   val onSuccess: (cryptoObject: CryptoObject) -> Unit,
-  val onFailure: (errorCode: Int, errString: String) -> Unit
+  val onFailure: (errorCode: Biometrics.ErrorCode, errString: String) -> Unit
 ) : BiometricPrompt.AuthenticationCallback() {
   override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
     super.onAuthenticationError(errorCode, errString)
 
-    onFailure(errorCode, errString.toString())
+    onFailure(Biometrics.ErrorCode.INTERNAL_ERROR, "$errString, Internal Error Code:  $errorCode")
   }
 
   override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {

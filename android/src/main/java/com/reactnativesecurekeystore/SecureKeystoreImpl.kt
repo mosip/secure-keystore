@@ -6,9 +6,6 @@ import android.os.Build
 import android.util.Base64
 import android.util.Log
 import androidx.annotation.RequiresApi
-import com.facebook.react.bridge.Promise
-import com.facebook.react.bridge.WritableMap
-import com.facebook.react.bridge.WritableNativeMap
 import com.reactnativesecurekeystore.dto.EncryptedOutput
 import com.reactnativesecurekeystore.exception.InvalidEncryptionText
 import com.reactnativesecurekeystore.exception.KeyNotFound
@@ -83,26 +80,31 @@ class SecureKeystoreImpl(
     return String(hmacSha)
   }
 
-  override fun sign(alias: String, data: String, promise: Promise) {
+  override fun sign(
+    alias: String,
+    data: String,
+    onSuccess: (signature: String) -> Unit,
+    onFailure: (code: Int, message: String) -> Unit
+  ) {
     val key = getKeyOrThrow(alias) as PrivateKey
     val signature = cipherBox.createSignature(key, data)
 
     biometrics.authenticate(
       signature,
-      onSuccess = { cryptoObject -> onAuthSuccess(cryptoObject, promise) },
-      onFailure = { errorCode, errString -> onAuthFailure(errorCode, errString, promise) }
+      onSuccess = { cryptoObject -> onAuthSuccess(cryptoObject, onSuccess ) },
+      onFailure = { errorCode, errString -> onAuthFailure(errorCode, errString, onFailure ) }
     )
   }
 
-  private fun onAuthSuccess(cryptoObject: CryptoObject, promise: Promise) {
+  private fun onAuthSuccess(cryptoObject: CryptoObject, onSuccess: (signature: String) -> Unit) {
     val sign = cryptoObject.signature.sign()
-    promise.resolve(Base64.encodeToString(sign, Base64.DEFAULT) )
+    onSuccess(Base64.encodeToString(sign, Base64.DEFAULT) )
   }
 
 
-  private fun onAuthFailure(errorCode: Int, errorString: String, promise: Promise) {
-    Log.e(logTag, "errorCode : $errorCode, errorString: $errorString")
-    promise.reject(errorCode.toString(), errorString)
+  private fun onAuthFailure(errorCode: Biometrics.ErrorCode, errorString: String, onFailure: (code: Int, message: String) -> Unit) {
+    Log.e(logTag, "error in biometric auth: errorCode : $errorCode, errorString: $errorString")
+    onFailure(errorCode.ordinal, errorString)
   }
 
   private fun getKeyOrThrow(alias: String): Key {

@@ -10,5 +10,10 @@ interface SecureKeystore {
   fun decryptData(alias: String, encryptedText: String): String
   fun generateHmacSha(data: String): String
   fun removeKey(alias: String)
-  fun sign(alias: String, data: String, promise: Promise)
+  fun sign(
+    alias: String,
+    data: String,
+    onSuccess: (signature: String) -> Unit,
+    onFailure: (code: Int, message: String) -> Unit
+  )
 }

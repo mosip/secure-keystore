@@ -74,6 +74,10 @@ class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContext
   fun sign(alias: String, data: String, promise: Promise) {
     Log.d(logTag, "signing data: $data")
 
-    keystore.sign(alias, data, promise)
+    keystore.sign(
+      alias,
+      data,
+      onSuccess = { signature -> run { promise.resolve(signature) } },
+      onFailure = { code, message -> run { promise.reject(code.toString(), message) } })
   }
 }
