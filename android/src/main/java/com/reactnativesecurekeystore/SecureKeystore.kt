@@ -1,5 +1,7 @@
 package com.reactnativesecurekeystore
 
+import com.facebook.react.bridge.Promise
+
 interface SecureKeystore {
   fun hasAlias(alias: String): Boolean
   fun generateKey(alias: String)
@@ -8,5 +10,5 @@ interface SecureKeystore {
   fun decryptData(alias: String, encryptedText: String): String
   fun generateHmacSha(data: String): String
   fun removeKey(alias: String)
-  fun sign(alias: String, data: String): String
+  fun sign(alias: String, data: String, promise: Promise)
 }

@@ -1,14 +1,20 @@
 package com.reactnativesecurekeystore
 
+import Biometrics
+import android.os.Build
 import android.util.Log
+import androidx.annotation.RequiresApi
+import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 
+@RequiresApi(Build.VERSION_CODES.P)
 class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
   private val keyGenerator = KeyGeneratorImpl()
   private val cipherBox = CipherBoxImpl()
-  private val keystore = SecureKeystoreImpl(keyGenerator, cipherBox)
+  private val biometrics = Biometrics(reactContext)
+  private val keystore = SecureKeystoreImpl(keyGenerator, cipherBox, biometrics)
   private val deviceCapability = DeviceCapability(keystore, keyGenerator)
   private val logTag = util.getLogTag(javaClass.simpleName)
 
@@ -64,9 +70,10 @@ class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContext
     return keystore.generateHmacSha(data)
   }
 
-  @ReactMethod(isBlockingSynchronousMethod = true)
-  fun sign(alias: String, data: String): String {
+  @ReactMethod
+  fun sign(alias: String, data: String, promise: Promise) {
     Log.d(logTag, "signing data: $data")
-    return keystore.sign(alias, data)
+
+    keystore.sign(alias, data, promise)
   }
 }

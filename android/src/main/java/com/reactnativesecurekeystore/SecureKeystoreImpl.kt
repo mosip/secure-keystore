@@ -1,7 +1,14 @@
 package com.reactnativesecurekeystore
 
+import Biometrics
+import android.hardware.biometrics.BiometricPrompt.CryptoObject
+import android.os.Build
 import android.util.Base64
 import android.util.Log
+import androidx.annotation.RequiresApi
+import com.facebook.react.bridge.Promise
+import com.facebook.react.bridge.WritableMap
+import com.facebook.react.bridge.WritableNativeMap
 import com.reactnativesecurekeystore.dto.EncryptedOutput
 import com.reactnativesecurekeystore.exception.InvalidEncryptionText
 import com.reactnativesecurekeystore.exception.KeyNotFound
@@ -10,8 +17,12 @@ import java.security.Key
 import java.security.KeyStore
 import java.security.PrivateKey
 
-
-class SecureKeystoreImpl(private val keyGenerator: KeyGenerator, private val cipherBox: CipherBox) : SecureKeystore {
+@RequiresApi(Build.VERSION_CODES.P)
+class SecureKeystoreImpl(
+  private val keyGenerator: KeyGenerator,
+  private val cipherBox: CipherBox,
+  private val biometrics: Biometrics
+) : SecureKeystore {
   private var ks: KeyStore = KeyStore.getInstance(KEYSTORE_TYPE)
   private val logTag = getLogTag(javaClass.simpleName)
 
@@ -37,12 +48,14 @@ class SecureKeystoreImpl(private val keyGenerator: KeyGenerator, private val cip
       ks.deleteEntry(alias)
     }
   }
+
   override fun hasAlias(alias: String): Boolean {
     if (ks.containsAlias(alias)) {
       return true
     }
     return false
   }
+
   override fun encryptData(alias: String, data: String): String {
     Log.i(logTag, ks.aliases().toList().toString())
     val key = getKeyOrThrow(alias)
@@ -54,7 +67,7 @@ class SecureKeystoreImpl(private val keyGenerator: KeyGenerator, private val cip
 
   override fun decryptData(alias: String, encryptedText: String): String {
     val key = getKeyOrThrow(alias)
-    if(!EncryptedOutput.validate(encryptedText)) {
+    if (!EncryptedOutput.validate(encryptedText)) {
       throw InvalidEncryptionText()
     }
 
@@ -70,12 +83,26 @@ class SecureKeystoreImpl(private val keyGenerator: KeyGenerator, private val cip
     return String(hmacSha)
   }
 
-  override fun sign(alias: String, data: String): String {
+  override fun sign(alias: String, data: String, promise: Promise) {
     val key = getKeyOrThrow(alias) as PrivateKey
+    val signature = cipherBox.createSignature(key, data)
 
-    val signature = cipherBox.sign(key, data)
+    biometrics.authenticate(
+      signature,
+      onSuccess = { cryptoObject -> onAuthSuccess(cryptoObject, promise) },
+      onFailure = { errorCode, errString -> onAuthFailure(errorCode, errString, promise) }
+    )
+  }
 
-    return Base64.encodeToString(signature, Base64.DEFAULT)
+  private fun onAuthSuccess(cryptoObject: CryptoObject, promise: Promise) {
+    val sign = cryptoObject.signature.sign()
+    promise.resolve(Base64.encodeToString(sign, Base64.DEFAULT) )
+  }
+
+
+  private fun onAuthFailure(errorCode: Int, errorString: String, promise: Promise) {
+    Log.e(logTag, "errorCode : $errorCode, errorString: $errorString")
+    promise.reject(errorCode.toString(), errorString)
   }
 
   private fun getKeyOrThrow(alias: String): Key {

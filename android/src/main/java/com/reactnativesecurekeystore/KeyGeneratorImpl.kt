@@ -1,6 +1,7 @@
 package com.reactnativesecurekeystore
 
 import android.security.keystore.KeyGenParameterSpec
+import android.security.keystore.KeyProperties
 import android.security.keystore.KeyProperties.*
 import java.security.KeyPair
 import java.security.KeyPairGenerator
@@ -8,6 +9,7 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 
 const val KEY_PAIR_KEY_SIZE = 4096
+const val KEY_AUTH_TIMEOUT = 10 * 60 * 1000
 
 class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
   private val keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM_AES, KEYSTORE_TYPE)
@@ -49,5 +51,6 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
       .setDigests(DIGEST_SHA256, DIGEST_SHA512, DIGEST_SHA1)
       .setEncryptionPaddings(ENCRYPTION_PADDING_RSA_PKCS1)
       .setSignaturePaddings(SIGNATURE_PADDING_RSA_PKCS1)
+      .setUserAuthenticationRequired(true)
   }
 }

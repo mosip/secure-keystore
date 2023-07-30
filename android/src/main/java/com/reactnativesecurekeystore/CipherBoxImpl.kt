@@ -26,12 +26,12 @@ class CipherBoxImpl : CipherBox {
     return EncryptedOutput(encryptedData, cipher.iv)
   }
 
-  override fun sign(key: PrivateKey, data: String): ByteArray {
+  override fun createSignature(key: PrivateKey, data: String): Signature {
     val hash = data.toByteArray(charset("UTF8"))
     val signature = Signature.getInstance(SIGN_ALGORITHM).run {
       initSign(key)
       update(hash)
-      sign()
+      this
     }
 
     return signature
