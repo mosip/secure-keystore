@@ -92,14 +92,22 @@ class SecureKeystoreImpl(
 
     biometrics.authenticate(
       signature,
-      onSuccess = { cryptoObject -> onAuthSuccess(cryptoObject, onSuccess ) },
+      onSuccess = { cryptoObject -> onAuthSuccess(cryptoObject, onSuccess, onFailure ) },
       onFailure = { errorCode, errString -> onAuthFailure(errorCode, errString, onFailure ) }
     )
   }
 
-  private fun onAuthSuccess(cryptoObject: CryptoObject, onSuccess: (signature: String) -> Unit) {
-    val sign = cryptoObject.signature.sign()
-    onSuccess(Base64.encodeToString(sign, Base64.DEFAULT) )
+  private fun onAuthSuccess(
+    cryptoObject: CryptoObject,
+    onSuccess: (signature: String) -> Unit,
+    onFailure: (code: Int, message: String) -> Unit
+  ) {
+    try {
+      val sign = cryptoObject.signature.sign()
+      onSuccess(Base64.encodeToString(sign, Base64.DEFAULT) )
+    } catch (e: Exception) {
+      onFailure(Biometrics.ErrorCode.INTERNAL_ERROR.ordinal, e.message.toString())
+    }
   }
 
 

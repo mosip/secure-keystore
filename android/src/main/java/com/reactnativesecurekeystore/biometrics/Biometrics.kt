@@ -6,8 +6,10 @@ import android.hardware.biometrics.BiometricManager
 import android.hardware.biometrics.BiometricPrompt
 import android.os.Build
 import android.os.CancellationSignal
+import android.util.Log
 import androidx.annotation.RequiresApi
 import com.facebook.react.bridge.UiThreadUtil
+import com.reactnativesecurekeystore.common.util
 import java.security.Signature
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
@@ -16,6 +18,7 @@ import java.util.concurrent.Executors
 @RequiresApi(Build.VERSION_CODES.P)
 class Biometrics(
   private val context: Context) {
+  private val logTag = util.getLogTag(javaClass.simpleName)
 
   enum class ErrorCode {
     INTERNAL_ERROR,
@@ -42,6 +45,7 @@ class Biometrics(
             authCallback,
           )
         } catch (e: Exception) {
+          Log.e(logTag, "exception in creating auth prompt: ", e)
           onFailure(ErrorCode.INTERNAL_ERROR, "Failed to display auth prompt")
         }
       }
@@ -54,10 +58,6 @@ class Biometrics(
       .setNegativeButton("Cancel", executor) { _, _ ->
         onFailure(ErrorCode.CANCELLED_BY_USER, "Cancelled by clicking on negative button")
       }
-
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-      builder.setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
-    }
 
     return builder.build()
   }
