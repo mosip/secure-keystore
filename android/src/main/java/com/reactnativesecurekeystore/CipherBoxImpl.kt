@@ -1,20 +1,21 @@
 package com.reactnativesecurekeystore
 
 import android.security.keystore.KeyProperties
+import android.util.Log
 import com.reactnativesecurekeystore.dto.EncryptedOutput
 import java.security.Key
 import java.security.MessageDigest
 import java.security.PrivateKey
 import java.security.Signature
 import javax.crypto.Cipher
+import javax.crypto.Mac
 import javax.crypto.spec.GCMParameterSpec
-
 
 const val CIPHER_ALGORITHM =
   "${KeyProperties.KEY_ALGORITHM_AES}/${KeyProperties.BLOCK_MODE_GCM}/${KeyProperties.ENCRYPTION_PADDING_NONE}"
 const val GCM_TAG_LEN = 128
 const val SIGN_ALGORITHM = "SHA256with${KeyProperties.KEY_ALGORITHM_RSA}"
-const val HMAC_ALGORITHM = "SHA256"
+const val HMAC_ALGORITHM = "HmacSHA256"
 
 class CipherBoxImpl : CipherBox {
   override fun encryptData(key: Key, data: String): EncryptedOutput {
@@ -37,10 +38,16 @@ class CipherBoxImpl : CipherBox {
     return signature
   }
 
-  override fun generateHmacSha(data: String): ByteArray {
-    val messageDigest = MessageDigest.getInstance(HMAC_ALGORITHM)
-    messageDigest.update(data.toByteArray())
-    return messageDigest.digest()
+  override fun generateHmacSha(key: Key, data: String): ByteArray {
+    val mac = Mac.getInstance(HMAC_ALGORITHM);
+
+    try{
+      mac.init(key)
+    } catch (e: Exception) {
+      Log.e("debugging", "Exception in generatehmac", e)
+    }
+
+    return mac.doFinal()
   }
 
   override fun decryptData(key: Key, encryptedOutput: EncryptedOutput): ByteArray {

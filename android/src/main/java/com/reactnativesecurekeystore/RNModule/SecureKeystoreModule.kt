@@ -47,33 +47,31 @@ class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContext
   // Generates KeyPair and returns Public key
   @ReactMethod(isBlockingSynchronousMethod = true)
   fun generateKeyPair(alias: String): String {
-    Log.d(logTag, "Generating a keyPair for $alias")
-    val publicKey = keystore.generateKeyPair(alias)
-    Log.d(logTag, "Publickey$publicKey")
-    return publicKey
+    Log.d(logTag, "Generating a keyPair")
+    return keystore.generateKeyPair(alias)
   }
 
   @ReactMethod(isBlockingSynchronousMethod = true)
   fun encryptData(alias: String, data: String): String {
-    Log.d(logTag, "Encrypting data: $data")
+    Log.d(logTag, "Encrypting data")
     return keystore.encryptData(alias, data)
   }
 
   @ReactMethod(isBlockingSynchronousMethod = true)
   fun decryptData(alias: String, encryptedText: String): String {
-    Log.d(logTag, "decrypting data: $encryptedText")
+    Log.d(logTag, "decrypting data")
     return keystore.decryptData(alias, encryptedText)
   }
 
   @ReactMethod(isBlockingSynchronousMethod = true)
-  fun generateHmacSha(data: String): String {
-    Log.d(logTag, "generating HACH Sha for data: $data")
-    return keystore.generateHmacSha(data)
+  fun generateHmacSha(alias: String, data: String): String {
+    Log.d(logTag, "generating HACH Sha for data")
+    return keystore.generateHmacSha(alias, data)
   }
 
   @ReactMethod
   fun sign(alias: String, data: String, promise: Promise) {
-    Log.d(logTag, "signing data: $data")
+    Log.d(logTag, "signing data")
 
     keystore.sign(
       alias,

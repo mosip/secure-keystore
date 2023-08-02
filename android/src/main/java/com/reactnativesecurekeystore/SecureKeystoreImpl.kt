@@ -14,6 +14,7 @@ import com.reactnativesecurekeystore.common.util.Companion.getLogTag
 import java.security.Key
 import java.security.KeyStore
 import java.security.PrivateKey
+import javax.crypto.SecretKey
 
 @RequiresApi(Build.VERSION_CODES.P)
 class SecureKeystoreImpl(
@@ -75,10 +76,19 @@ class SecureKeystoreImpl(
     return String(decryptedData)
   }
 
-  override fun generateHmacSha(data: String): String {
-    val hmacSha = cipherBox.generateHmacSha(data)
+  override fun generateHmacSha(alias: String, data: String): String {
+    val key = getKeyOrThrow(alias) as SecretKey
 
-    return String(hmacSha)
+    val hmacSha:ByteArray
+
+    try {
+      hmacSha = cipherBox.generateHmacSha(key, data)
+
+      return String(hmacSha)
+    } catch (e: RuntimeException) {
+      Log.e(logTag, "Exception in Hmac generation: ", e)
+      throw e
+    }
   }
 
   override fun sign(

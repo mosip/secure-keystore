@@ -1,7 +1,6 @@
 package com.reactnativesecurekeystore
 
 import android.security.keystore.KeyGenParameterSpec
-import android.security.keystore.KeyProperties
 import android.security.keystore.KeyProperties.*
 import java.security.KeyPair
 import java.security.KeyPairGenerator
@@ -21,7 +20,6 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
       getKeyGenSpecBuilder(alias).build()
     )
 
-    // Assumption: Generate Key also stores Key in Keystore
     return keyGenerator.generateKey()
   }
 
@@ -48,7 +46,7 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
 
     return KeyGenParameterSpec.Builder(alias, purposes)
       .setKeySize(KEY_PAIR_KEY_SIZE)
-      .setDigests(DIGEST_SHA256, DIGEST_SHA512, DIGEST_SHA1)
+      .setDigests(DIGEST_SHA256, DIGEST_SHA512)
       .setEncryptionPaddings(ENCRYPTION_PADDING_RSA_PKCS1)
       .setSignaturePaddings(SIGNATURE_PADDING_RSA_PKCS1)
       .setUserAuthenticationRequired(true)
