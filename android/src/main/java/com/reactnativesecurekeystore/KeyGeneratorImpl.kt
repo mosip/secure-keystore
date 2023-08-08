@@ -1,5 +1,6 @@
 package com.reactnativesecurekeystore
 
+import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties.*
 import java.security.KeyPair
@@ -8,26 +9,34 @@ import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 
 const val KEY_PAIR_KEY_SIZE = 4096
-const val KEY_AUTH_TIMEOUT = 10 * 60 * 1000
 
 class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
   private val keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM_AES, KEYSTORE_TYPE)
   private val keyPairGenerator = KeyPairGenerator.getInstance(KEY_ALGORITHM_RSA, KEYSTORE_TYPE)
 
   /**  Generate secret key and store it in AndroidKeystore */
-  override fun generateKey(alias: String): SecretKey {
-    keyGenerator.init(
-      getKeyGenSpecBuilder(alias).build()
-    )
+  override fun generateKey(alias: String, isAuthRequired: Boolean, authTimeout: Int?): SecretKey {
+    val keySpecBuilder = getKeyGenSpecBuilder(alias)
+
+    if (isAuthRequired) {
+      setUserAuth(keySpecBuilder, authTimeout)
+    }
+
+    keyGenerator.init(keySpecBuilder.build())
+
 
     return keyGenerator.generateKey()
   }
 
   /** Generate a new key pair */
-  override fun generateKeyPair(alias: String): KeyPair {
-    keyPairGenerator.initialize(
-      getKeyPairGenSpecBuilder(alias).build()
-    )
+  override fun generateKeyPair(alias: String, isAuthRequired: Boolean, authTimeout: Int?): KeyPair {
+    val keySpecBuilder = getKeyPairGenSpecBuilder(alias)
+
+    if (isAuthRequired) {
+      setUserAuth(keySpecBuilder, authTimeout)
+    }
+
+    keyPairGenerator.initialize(keySpecBuilder.build())
 
     return keyPairGenerator.generateKeyPair()
   }
@@ -39,6 +48,7 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
       .setKeySize(ENCRYPTION_KEY_SIZE)
       .setBlockModes(BLOCK_MODE_GCM)
       .setEncryptionPaddings(ENCRYPTION_PADDING_NONE)
+      .setUserAuthenticationRequired(true)
   }
 
   private fun getKeyPairGenSpecBuilder(alias: String): KeyGenParameterSpec.Builder {
@@ -49,6 +59,23 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
       .setDigests(DIGEST_SHA256, DIGEST_SHA512)
       .setEncryptionPaddings(ENCRYPTION_PADDING_RSA_PKCS1)
       .setSignaturePaddings(SIGNATURE_PADDING_RSA_PKCS1)
-      .setUserAuthenticationRequired(true)
+  }
+
+  private fun setUserAuth(
+    builder: KeyGenParameterSpec.Builder, authTimeout: Int?
+  ) {
+    builder.setUserAuthenticationRequired(true)
+
+    if (authTimeout != null) {
+      setAuthTimeout(builder, authTimeout)
+    }
+  }
+
+  private fun setAuthTimeout(builder: KeyGenParameterSpec.Builder, authTimeout: Int) {
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
+      builder.setUserAuthenticationParameters(authTimeout, AUTH_BIOMETRIC_STRONG)
+    } else {
+      builder.setUserAuthenticationValidityDurationSeconds(authTimeout)
+    }
   }
 }

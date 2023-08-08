@@ -1,16 +1,13 @@
 package com.reactnativesecurekeystore
 
-import com.reactnativesecurekeystore.biometrics.Biometrics
-import android.os.Build
 import android.util.Log
-import androidx.annotation.RequiresApi
 import com.facebook.react.bridge.Promise
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
+import com.reactnativesecurekeystore.biometrics.Biometrics
 import com.reactnativesecurekeystore.common.util
 
-@RequiresApi(Build.VERSION_CODES.P)
 class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
   private val keyGenerator = KeyGeneratorImpl()
   private val cipherBox = CipherBoxImpl()
@@ -38,35 +35,48 @@ class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContext
   }
 
   @ReactMethod(isBlockingSynchronousMethod = true)
-  fun generateKey(alias: String) {
+  fun generateKey(alias: String, isAuthRequired: Boolean, authTimeout: Int?) {
     Log.d(logTag, "Generating a key for $alias")
 
-    keystore.generateKey(alias)
+    keystore.generateKey(alias, isAuthRequired, authTimeout)
   }
 
   // Generates KeyPair and returns Public key
   @ReactMethod(isBlockingSynchronousMethod = true)
-  fun generateKeyPair(alias: String): String {
+  fun generateKeyPair(alias: String, isAuthRequired: Boolean, authTimeout: Int?): String {
     Log.d(logTag, "Generating a keyPair")
-    return keystore.generateKeyPair(alias)
+    return keystore.generateKeyPair(alias, isAuthRequired, authTimeout)
   }
 
-  @ReactMethod(isBlockingSynchronousMethod = true)
-  fun encryptData(alias: String, data: String): String {
+  @ReactMethod
+  fun encryptData(alias: String, data: String, promise: Promise) {
     Log.d(logTag, "Encrypting data")
-    return keystore.encryptData(alias, data)
+
+    keystore.encryptData(
+      alias,
+      data,
+      onSuccess = { encryptedText -> run { promise.resolve(encryptedText) } },
+      onFailure = { code, message -> run { promise.reject(code.toString(), message) } })
   }
 
-  @ReactMethod(isBlockingSynchronousMethod = true)
-  fun decryptData(alias: String, encryptedText: String): String {
-    Log.d(logTag, "decrypting data")
-    return keystore.decryptData(alias, encryptedText)
+  @ReactMethod
+  fun decryptData(alias: String, encryptedText: String, promise: Promise) {
+    Log.d(logTag, "decrypting data with $alias")
+
+    keystore.decryptData(
+      alias,
+      encryptedText,
+      onSuccess = { data -> run { promise.resolve(data) } },
+      onFailure = { code, message -> run { promise.reject(code.toString(), message) } })
   }
 
-  @ReactMethod(isBlockingSynchronousMethod = true)
-  fun generateHmacSha(alias: String, data: String): String {
+  @ReactMethod
+  fun generateHmacSha(alias: String, data: String, promise: Promise) {
     Log.d(logTag, "generating HACH Sha for data")
-    return keystore.generateHmacSha(alias, data)
+
+    keystore.generateHmacSha(alias, data,
+      onSuccess = { sha -> run { promise.resolve(sha) } },
+      onFailure = { code, message -> run { promise.reject(code.toString(), message) } })
   }
 
   @ReactMethod

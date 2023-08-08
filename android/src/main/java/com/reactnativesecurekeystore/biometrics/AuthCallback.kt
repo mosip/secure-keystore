@@ -1,13 +1,8 @@
-import android.hardware.biometrics.BiometricPrompt
-import android.hardware.biometrics.BiometricPrompt.CryptoObject
-import android.os.Build
-import androidx.annotation.RequiresApi
+import androidx.biometric.BiometricPrompt
 import com.reactnativesecurekeystore.biometrics.Biometrics
 
-
-@RequiresApi(Build.VERSION_CODES.P)
 class BiometricPromptAuthCallback (
-  val onSuccess: (cryptoObject: CryptoObject) -> Unit,
+  val onSuccess: (cryptoObject: BiometricPrompt.CryptoObject?) -> Unit,
   val onFailure: (errorCode: Biometrics.ErrorCode, errString: String) -> Unit
 ) : BiometricPrompt.AuthenticationCallback() {
   override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
