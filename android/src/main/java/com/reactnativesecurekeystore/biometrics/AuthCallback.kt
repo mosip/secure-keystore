@@ -7,7 +7,7 @@ import kotlin.math.acos
 
 class BiometricPromptAuthCallback(
   private val continuation: Continuation<Unit>,
-  private val action: (CryptoObject) -> Unit,
+  private val action: (CryptoObject?) -> Unit,
 ) : BiometricPrompt.AuthenticationCallback() {
   override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
     super.onAuthenticationError(errorCode, errString)
@@ -19,11 +19,7 @@ class BiometricPromptAuthCallback(
     super.onAuthenticationSucceeded(result)
     val cryptoObject = result.cryptoObject
 
-    if(cryptoObject != null) {
-      action(cryptoObject)
-      continuation.resume(Unit)
-    } else {
-      continuation.resumeWithException(RuntimeException("Crypto Object is empty"))
-    }
+    action(cryptoObject)
+    continuation.resume(Unit)
   }
 }
