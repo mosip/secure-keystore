@@ -8,10 +8,10 @@ import com.reactnativesecurekeystore.common.util.Companion.getLogTag
 import com.reactnativesecurekeystore.dto.EncryptedOutput
 import com.reactnativesecurekeystore.exception.InvalidEncryptionText
 import com.reactnativesecurekeystore.exception.KeyNotFound
+import kotlinx.coroutines.runBlocking
 import java.security.Key
 import java.security.KeyStore
 import java.security.PrivateKey
-import java.util.Objects
 import javax.crypto.SecretKey
 
 class SecureKeystoreImpl(
@@ -57,17 +57,19 @@ class SecureKeystoreImpl(
     onSuccess: (encryptedText: String) -> Unit,
     onFailure: (code: Int, message: String) -> Unit
   ) {
-    synchronized(mutex) {
     val key = getKeyOrThrow(alias)
 
-    val cipher = cipherBox.initEncryptCipher(key)
+    runBlocking {
+      val preAction = {
+        CryptoObject(cipherBox.initEncryptCipher(key))
+      }
 
-    val action = { cryptoObject: CryptoObject ->
+      val action = { cryptoObject: CryptoObject ->
         val encryptedText = cipherBox.encryptData(cryptoObject.cipher!!, data).toString()
         onSuccess(encryptedText)
-    }
+      }
 
-    biometrics.authenticateAndPerform(CryptoObject(cipher), action, onFailure)
+      biometrics.authenticateAndPerform(preAction, action, onFailure)
     }
   }
 
@@ -76,26 +78,24 @@ class SecureKeystoreImpl(
     onSuccess: (data: String) -> Unit,
     onFailure: (code: Int, message: String) -> Unit
   ) {
-    synchronized(mutex) {
-      val key = getKeyOrThrow(alias)
+    val key = getKeyOrThrow(alias)
 
-      if (!EncryptedOutput.validate(encryptedText)) {
-        throw InvalidEncryptionText()
-      }
+    if (!EncryptedOutput.validate(encryptedText)) {
+      throw InvalidEncryptionText()
+    }
 
+    runBlocking {
       val encryptedOutput = EncryptedOutput(encryptedText)
-      val cipher = cipherBox.initDecryptCipher(key, encryptedOutput)
 
-      Log.d(logTag, "got cipher for decrypt  $encryptedText")
+      val preAction = { CryptoObject(cipherBox.initDecryptCipher(key, encryptedOutput)) }
 
       val action = { cryptoObject: CryptoObject ->
         val data = cipherBox.decryptData(cryptoObject.cipher!!, encryptedOutput)
-        Log.d(logTag, "got data ${String(data)}")
         onSuccess(String(data))
       }
 
       biometrics.authenticateAndPerform(
-        CryptoObject(cipher),
+        preAction,
         action,
         onFailure
       )
@@ -107,17 +107,21 @@ class SecureKeystoreImpl(
     onSuccess: (signature: String) -> Unit, onFailure: (code: Int, message: String) -> Unit
   ) {
     val key = getKeyOrThrow(alias) as PrivateKey
-    val signature = cipherBox.createSignature(key, data)
-    val action = { cryptoObject: CryptoObject ->
-      val signatureText = cipherBox.sign(cryptoObject.signature!!)
-      onSuccess(signatureText)
-    }
 
-    biometrics.authenticateAndPerform(
-      CryptoObject(signature),
-      action,
-      onFailure
-    )
+    runBlocking {
+      val preAction = { CryptoObject(cipherBox.createSignature(key, data)) }
+
+      val action = { cryptoObject: CryptoObject ->
+        val signatureText = cipherBox.sign(cryptoObject.signature!!)
+        onSuccess(signatureText)
+      }
+
+      biometrics.authenticateAndPerform(
+        preAction,
+        action,
+        onFailure
+      )
+    }
   }
 
   override fun generateHmacSha(

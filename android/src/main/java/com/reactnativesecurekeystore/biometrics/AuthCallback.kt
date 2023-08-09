@@ -1,19 +1,29 @@
 import androidx.biometric.BiometricPrompt
-import com.reactnativesecurekeystore.biometrics.Biometrics
+import androidx.biometric.BiometricPrompt.CryptoObject
+import kotlin.coroutines.Continuation
+import kotlin.coroutines.resume
+import kotlin.coroutines.resumeWithException
+import kotlin.math.acos
 
-class BiometricPromptAuthCallback (
-  val onSuccess: (cryptoObject: BiometricPrompt.CryptoObject?) -> Unit,
-  val onFailure: (errorCode: Biometrics.ErrorCode, errString: String) -> Unit
+class BiometricPromptAuthCallback(
+  private val continuation: Continuation<Unit>,
+  private val action: (CryptoObject) -> Unit,
 ) : BiometricPrompt.AuthenticationCallback() {
   override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
     super.onAuthenticationError(errorCode, errString)
 
-    onFailure(Biometrics.ErrorCode.INTERNAL_ERROR, "$errString, Internal Error Code:  $errorCode")
+    continuation.resumeWithException(RuntimeException("User has cancelled biometric auth code: $errorCode, message: $errString"))
   }
 
   override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
     super.onAuthenticationSucceeded(result)
+    val cryptoObject = result.cryptoObject
 
-    onSuccess(result.cryptoObject)
+    if(cryptoObject != null) {
+      action(cryptoObject)
+      continuation.resume(Unit)
+    } else {
+      continuation.resumeWithException(RuntimeException("Crypto Object is empty"))
+    }
   }
 }
