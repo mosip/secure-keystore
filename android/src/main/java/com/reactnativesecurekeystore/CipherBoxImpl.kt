@@ -79,6 +79,6 @@ class CipherBoxImpl : CipherBox {
       throw e
     }
 
-    return mac.doFinal()
+    return mac.doFinal(data.toByteArray())
   }
 }

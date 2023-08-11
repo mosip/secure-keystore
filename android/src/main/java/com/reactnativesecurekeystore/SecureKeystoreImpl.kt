@@ -37,6 +37,10 @@ class SecureKeystoreImpl(
     return PemConverter(keyPair.public).toPem()
   }
 
+  override fun generateHmacSha256Key(alias: String) {
+    keyGenerator.generateHmacKey(alias)
+  }
+
   /** Remove key with provided name from security storage.  */
   override fun removeKey(alias: String) {
     if (ks.containsAlias(alias)) {
@@ -128,18 +132,18 @@ class SecureKeystoreImpl(
     alias: String, data: String,
     onSuccess: (sha: String) -> Unit,
     onFailure: (code: Int, message: String) -> Unit
-  ): String {
+  ) {
     val key = getKeyOrThrow(alias) as SecretKey
 
     val hmacSha: ByteArray
 
     try {
       hmacSha = cipherBox.generateHmacSha(key, data)
-
-      return String(hmacSha)
+      Log.i(logTag, hmacSha.toString())
+      onSuccess(String(hmacSha))
     } catch (e: RuntimeException) {
       Log.e(logTag, "Exception in Hmac generation: ", e)
-      throw e
+      onFailure(e.hashCode(), e.message.toString());
     }
   }
 

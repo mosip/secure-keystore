@@ -78,4 +78,14 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
       builder.setUserAuthenticationValidityDurationSeconds(authTimeout)
     }
   }
+
+  override fun generateHmacKey(hmacKeyAlias: String): SecretKey {
+    val keyGenerator = KeyGenerator.getInstance(
+      KEY_ALGORITHM_HMAC_SHA256, "AndroidKeyStore"
+    )
+    keyGenerator.init(
+      KeyGenParameterSpec.Builder(hmacKeyAlias, PURPOSE_SIGN).build()
+    )
+    return keyGenerator.generateKey()
+  }
 }

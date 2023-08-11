@@ -7,4 +7,5 @@ export interface SecureKeystoreModule {
   decryptData: (alias: string, encryptedText: string) => Promise<string>;
   generateHmacSha: (alias: string, data: string) => Promise<string>;
   sign: (alias: string, data: string) => Promise<string>;
+  generateHmacshaKey: (alias: string) => void;
 }

@@ -30,6 +30,6 @@ interface SecureKeystore {
     alias: String, data: String,
     onSuccess: (signature: String) -> Unit,
     onFailure: (code: Int, message: String) -> Unit
-  ): String
-
+  )
+   fun generateHmacSha256Key(alias: String)
 }

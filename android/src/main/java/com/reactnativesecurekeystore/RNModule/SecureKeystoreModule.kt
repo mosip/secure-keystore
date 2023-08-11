@@ -48,6 +48,13 @@ class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContext
     return keystore.generateKeyPair(alias, isAuthRequired, authTimeout)
   }
 
+  // Generates hmacsha256 key
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  fun generateHmacshaKey(alias: String) {
+    Log.d(logTag, "Generating a generateHmacsha256 Key")
+    keystore.generateHmacSha256Key(alias)
+  }
+
   @ReactMethod
   fun encryptData(alias: String, data: String, promise: Promise) {
     Log.d(logTag, "Encrypting data")
@@ -72,7 +79,7 @@ class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContext
 
   @ReactMethod
   fun generateHmacSha(alias: String, data: String, promise: Promise) {
-    Log.d(logTag, "generating HACH Sha for data")
+    Log.d(logTag, "generating HMAC Sha for data")
 
     keystore.generateHmacSha(alias, data,
       onSuccess = { sha -> run { promise.resolve(sha) } },
