@@ -27,23 +27,23 @@ class Biometrics(
   }
 
   suspend fun authenticateAndPerform(
-    preAction: () -> CryptoObject,
+    createCryptoObject: () -> CryptoObject,
     action: (CryptoObject) -> Unit,
     onFailure: (code: Int, message: String) -> Unit
   ) {
     try {
       Log.d(logTag, "Calling action for auth")
-      val preAuthCryptoObject = preAction()
+      val preAuthCryptoObject = createCryptoObject()
       action(preAuthCryptoObject)
     } catch (e: UserNotAuthenticatedException) {
       // If key has timeout based biometric auth requirement, Cipher.Init fails and caught here
       Log.e(logTag, "Calling action failed due to auth exception with user not auth", e)
-      authenticate(preAction, action, false)
+      authenticate(createCryptoObject, action, false)
     }
     catch (e: IllegalBlockSizeException) {
       // If key has every use biometric auth requirement, Cipher.doFinal fails and caught here
       Log.e(logTag, "Calling action failed due to auth exception", e)
-      authenticate(preAction, action, true)
+      authenticate(createCryptoObject, action, true)
     } catch (e: Exception) {
       Log.e(logTag, "Calling action failed due to other exception", e)
       onFailure(ErrorCode.INTERNAL_ERROR.ordinal, e.message.toString())
@@ -51,24 +51,24 @@ class Biometrics(
   }
 
   private suspend fun authenticate(
-    preAction: () -> CryptoObject,
+    createCryptoObject: () -> CryptoObject,
     action: (CryptoObject) -> Unit,
-    preActionSuccess: Boolean
+    createCryptoObjectSuccess: Boolean
   ) {
 
     return suspendCoroutine { continuation ->
       UiThreadUtil.runOnUiThread {
         try {
           val fragmentActivity = context.currentActivity ?: throw NullPointerException("Not assigned current activity")
-          val onAuthSuccess:(CryptoObject?) -> Unit = { cryptoObject -> action(cryptoObject ?: preAction()) }
+          val onAuthSuccess:(CryptoObject?) -> Unit = { cryptoObject -> action(cryptoObject ?: createCryptoObject()) }
           val authCallback: BiometricPrompt.AuthenticationCallback = BiometricPromptAuthCallback(continuation, onAuthSuccess)
           val executor: Executor = Executors.newSingleThreadExecutor()
 
           val promptInfo = createPromptInfo()
           val biometricPrompt = BiometricPrompt(fragmentActivity as FragmentActivity, executor, authCallback)
 
-          if(preActionSuccess) {
-            biometricPrompt.authenticate(promptInfo, preAction())
+          if(createCryptoObjectSuccess) {
+            biometricPrompt.authenticate(promptInfo, createCryptoObject())
           } else {
             biometricPrompt.authenticate(promptInfo)
           }
