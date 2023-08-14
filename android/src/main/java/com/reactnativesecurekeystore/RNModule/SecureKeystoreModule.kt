@@ -96,4 +96,9 @@ class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContext
       onSuccess = { signature -> run { promise.resolve(signature) } },
       onFailure = { code, message -> run { promise.reject(code.toString(), message) } })
   }
+
+  @ReactMethod
+  fun clearKeys() {
+    keystore.removeAllKeys()
+  }
 }

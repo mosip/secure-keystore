@@ -32,4 +32,6 @@ interface SecureKeystore {
     onFailure: (code: Int, message: String) -> Unit
   )
    fun generateHmacSha256Key(alias: String)
+
+   fun removeAllKeys()
 }

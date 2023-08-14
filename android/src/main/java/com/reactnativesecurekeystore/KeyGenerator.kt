@@ -7,4 +7,6 @@ interface KeyGenerator {
   fun generateKey(alias: String, isAuthRequired: Boolean, authTimeout: Int?): SecretKey
   fun generateHmacKey(hmacKeyAlias: String): SecretKey
   fun generateKeyPair(alias: String, isAuthRequired: Boolean, authTimeout: Int?): KeyPair
+
+  fun removeAllKeys()
 }

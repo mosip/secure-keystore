@@ -3,8 +3,10 @@ package com.reactnativesecurekeystore
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties.*
+import java.lang.Exception
 import java.security.KeyPair
 import java.security.KeyPairGenerator
+import java.security.KeyStore
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 
@@ -87,4 +89,18 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
     }
   }
 
+  override fun removeAllKeys() {
+    val keyStore: KeyStore
+    try {
+      keyStore = KeyStore.getInstance("AndroidKeyStore")
+      keyStore.load(null)
+      val aliases = keyStore.aliases()
+      while (aliases.hasMoreElements()) {
+        val alias = aliases.nextElement()
+        keyStore.deleteEntry(alias)
+      }
+    } catch (e: Exception) {
+      e.printStackTrace()
+    }
+  }
 }

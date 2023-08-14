@@ -13,6 +13,7 @@ import com.reactnativesecurekeystore.exception.InvalidEncryptionText
 import com.reactnativesecurekeystore.exception.KeyInvalidatedException
 import com.reactnativesecurekeystore.exception.KeyNotFound
 import kotlinx.coroutines.runBlocking
+import java.lang.Exception
 import java.security.Key
 import java.security.KeyStore
 import java.security.PrivateKey
@@ -26,7 +27,7 @@ class SecureKeystoreImpl(
   private val mutex = Object()
 
   init {
-    ks.load(null);
+    ks.load(null)
   }
 
   /**  Generate secret key and store it in AndroidKeystore */
@@ -65,19 +66,23 @@ class SecureKeystoreImpl(
     onSuccess: (encryptedText: String) -> Unit,
     onFailure: (code: Int, message: String) -> Unit
   ) {
-    val key = getKeyOrThrow(alias)
+    try {
+      val key = getKeyOrThrow(alias)
 
-    runBlocking {
-      val createCryptoObject = {
-        CryptoObject(cipherBox.initEncryptCipher(key))
+      runBlocking {
+        val createCryptoObject = {
+          CryptoObject(cipherBox.initEncryptCipher(key))
+        }
+
+        val action = { cryptoObject: CryptoObject ->
+          val encryptedText = cipherBox.encryptData(cryptoObject.cipher!!, data).toString()
+          onSuccess(encryptedText)
+        }
+
+        biometrics.authenticateAndPerform(createCryptoObject, action, onFailure)
       }
-
-      val action = { cryptoObject: CryptoObject ->
-        val encryptedText = cipherBox.encryptData(cryptoObject.cipher!!, data).toString()
-        onSuccess(encryptedText)
-      }
-
-      biometrics.authenticateAndPerform(createCryptoObject, action, onFailure)
+    } catch (ex: Exception) {
+      onFailure(ex.hashCode(), ex.message.toString())
     }
   }
 
@@ -86,27 +91,31 @@ class SecureKeystoreImpl(
     onSuccess: (data: String) -> Unit,
     onFailure: (code: Int, message: String) -> Unit
   ) {
-    val key = getKeyOrThrow(alias)
+    try {
+      val key = getKeyOrThrow(alias)
 
-    if (!EncryptedOutput.validate(encryptedText)) {
-      throw InvalidEncryptionText()
-    }
-
-    runBlocking {
-      val encryptedOutput = EncryptedOutput(encryptedText)
-
-      val createCryptoObject = { CryptoObject(cipherBox.initDecryptCipher(key, encryptedOutput)) }
-
-      val action = { cryptoObject: CryptoObject ->
-        val data = cipherBox.decryptData(cryptoObject.cipher!!, encryptedOutput)
-        onSuccess(String(data))
+      if (!EncryptedOutput.validate(encryptedText)) {
+        throw InvalidEncryptionText()
       }
 
-      biometrics.authenticateAndPerform(
-        createCryptoObject,
-        action,
-        onFailure
-      )
+      runBlocking {
+        val encryptedOutput = EncryptedOutput(encryptedText)
+
+        val createCryptoObject = { CryptoObject(cipherBox.initDecryptCipher(key, encryptedOutput)) }
+
+        val action = { cryptoObject: CryptoObject ->
+          val data = cipherBox.decryptData(cryptoObject.cipher!!, encryptedOutput)
+          onSuccess(String(data))
+        }
+
+        biometrics.authenticateAndPerform(
+          createCryptoObject,
+          action,
+          onFailure
+        )
+      }
+    } catch (ex: Exception) {
+      onFailure(ex.hashCode(), ex.message.toString())
     }
   }
 
@@ -145,7 +154,7 @@ class SecureKeystoreImpl(
     } catch (e: RuntimeException) {
       Log.e(logTag, "Exception in Hmac generation: ", e)
 
-      onFailure(e.hashCode(), e.message.toString());
+      onFailure(e.hashCode(), e.message.toString())
     }
   }
 
@@ -158,10 +167,14 @@ class SecureKeystoreImpl(
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
       if(keyInfo.isInvalidatedByBiometricEnrollment) {
-        throw KeyInvalidatedException("Key Invalidated due to biometric encrollment")
+        throw KeyInvalidatedException("Key Invalidated due to biometric enrollment")
       }
     }
 
     return key;
+  }
+
+  override fun removeAllKeys() {
+    keyGenerator.removeAllKeys()
   }
 }
