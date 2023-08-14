@@ -10,7 +10,9 @@ import androidx.biometric.BiometricPrompt.PromptInfo
 import androidx.fragment.app.FragmentActivity
 import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.UiThreadUtil
-import com.reactnativesecurekeystore.common.util
+import com.reactnativesecurekeystore.common.Util
+import com.reactnativesecurekeystore.exception.ErrorCode
+import java.security.Key
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import javax.crypto.IllegalBlockSizeException
@@ -20,11 +22,7 @@ import kotlin.coroutines.suspendCoroutine
 class Biometrics(
   private val context: ReactApplicationContext
 ) {
-  private val logTag = util.getLogTag(javaClass.simpleName)
-
-  enum class ErrorCode {
-    INTERNAL_ERROR,
-  }
+  private val logTag = Util.getLogTag(javaClass.simpleName)
 
   suspend fun authenticateAndPerform(
     createCryptoObject: () -> CryptoObject,

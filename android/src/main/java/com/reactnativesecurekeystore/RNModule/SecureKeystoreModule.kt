@@ -6,7 +6,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.reactnativesecurekeystore.biometrics.Biometrics
-import com.reactnativesecurekeystore.common.util
+import com.reactnativesecurekeystore.common.Util
 
 class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
   private val keyGenerator = KeyGeneratorImpl()
@@ -14,7 +14,7 @@ class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContext
   private val biometrics = Biometrics(reactContext)
   private val keystore = SecureKeystoreImpl(keyGenerator, cipherBox, biometrics)
   private val deviceCapability = DeviceCapability(keystore, keyGenerator)
-  private val logTag = util.getLogTag(javaClass.simpleName)
+  private val logTag = Util.getLogTag(javaClass.simpleName)
 
   override fun getName(): String {
     return "SecureKeystore"

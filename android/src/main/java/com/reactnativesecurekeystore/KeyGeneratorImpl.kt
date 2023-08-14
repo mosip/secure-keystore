@@ -13,6 +13,7 @@ const val KEY_PAIR_KEY_SIZE = 4096
 class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
   private val keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM_AES, KEYSTORE_TYPE)
   private val keyPairGenerator = KeyPairGenerator.getInstance(KEY_ALGORITHM_RSA, KEYSTORE_TYPE)
+  private val hmacKeyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM_HMAC_SHA256, KEYSTORE_TYPE)
 
   /**  Generate secret key and store it in AndroidKeystore */
   override fun generateKey(alias: String, isAuthRequired: Boolean, authTimeout: Int?): SecretKey {
@@ -23,7 +24,6 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
     }
 
     keyGenerator.init(keySpecBuilder.build())
-
 
     return keyGenerator.generateKey()
   }
@@ -39,6 +39,14 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
     keyPairGenerator.initialize(keySpecBuilder.build())
 
     return keyPairGenerator.generateKeyPair()
+  }
+
+  override fun generateHmacKey(hmacKeyAlias: String): SecretKey {
+    val keyGenParameterSpec = KeyGenParameterSpec.Builder(hmacKeyAlias, PURPOSE_SIGN).build()
+
+    hmacKeyGenerator.init(keyGenParameterSpec)
+
+    return hmacKeyGenerator.generateKey()
   }
 
   private fun getKeyGenSpecBuilder(alias: String): KeyGenParameterSpec.Builder {
@@ -79,13 +87,4 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
     }
   }
 
-  override fun generateHmacKey(hmacKeyAlias: String): SecretKey {
-    val keyGenerator = KeyGenerator.getInstance(
-      KEY_ALGORITHM_HMAC_SHA256, "AndroidKeyStore"
-    )
-    keyGenerator.init(
-      KeyGenParameterSpec.Builder(hmacKeyAlias, PURPOSE_SIGN).build()
-    )
-    return keyGenerator.generateKey()
-  }
 }
