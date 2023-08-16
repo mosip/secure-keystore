@@ -3,6 +3,8 @@ package com.reactnativesecurekeystore
 import android.os.Build
 import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties.*
+import android.util.Log
+import com.reactnativesecurekeystore.common.Util
 import java.lang.Exception
 import java.security.KeyPair
 import java.security.KeyPairGenerator
@@ -16,6 +18,7 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
   private val keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM_AES, KEYSTORE_TYPE)
   private val keyPairGenerator = KeyPairGenerator.getInstance(KEY_ALGORITHM_RSA, KEYSTORE_TYPE)
   private val hmacKeyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM_HMAC_SHA256, KEYSTORE_TYPE)
+  private val logTag = Util.getLogTag(javaClass.simpleName)
 
   /**  Generate secret key and store it in AndroidKeystore */
   override fun generateKey(alias: String, isAuthRequired: Boolean, authTimeout: Int?): SecretKey {
@@ -27,6 +30,7 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
 
     keyGenerator.init(keySpecBuilder.build())
 
+    Log.d(logTag, "generating a new key 123")
     return keyGenerator.generateKey()
   }
 
@@ -58,7 +62,6 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
       .setKeySize(ENCRYPTION_KEY_SIZE)
       .setBlockModes(BLOCK_MODE_GCM)
       .setEncryptionPaddings(ENCRYPTION_PADDING_NONE)
-      .setUserAuthenticationRequired(true)
   }
 
   private fun getKeyPairGenSpecBuilder(alias: String): KeyGenParameterSpec.Builder {
@@ -86,21 +89,6 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
       builder.setUserAuthenticationParameters(authTimeout, AUTH_BIOMETRIC_STRONG)
     } else {
       builder.setUserAuthenticationValidityDurationSeconds(authTimeout)
-    }
-  }
-
-  override fun removeAllKeys() {
-    val keyStore: KeyStore
-    try {
-      keyStore = KeyStore.getInstance("AndroidKeyStore")
-      keyStore.load(null)
-      val aliases = keyStore.aliases()
-      while (aliases.hasMoreElements()) {
-        val alias = aliases.nextElement()
-        keyStore.deleteEntry(alias)
-      }
-    } catch (e: Exception) {
-      e.printStackTrace()
     }
   }
 }

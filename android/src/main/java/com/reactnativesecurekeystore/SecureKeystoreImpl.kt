@@ -24,7 +24,6 @@ class SecureKeystoreImpl(
 ) : SecureKeystore {
   private var ks: KeyStore = KeyStore.getInstance(KEYSTORE_TYPE)
   private val logTag = getLogTag(javaClass.simpleName)
-  private val mutex = Object()
 
   init {
     ks.load(null)
@@ -166,7 +165,7 @@ class SecureKeystoreImpl(
     val keyInfo: KeyInfo = getKeyInfo(key)
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-      if(keyInfo.isInvalidatedByBiometricEnrollment) {
+      if (keyInfo.isInvalidatedByBiometricEnrollment) {
         throw KeyInvalidatedException("Key Invalidated due to biometric enrollment")
       }
     }
@@ -175,6 +174,16 @@ class SecureKeystoreImpl(
   }
 
   override fun removeAllKeys() {
-    keyGenerator.removeAllKeys()
+    try {
+      ks.load(null)
+
+      val aliases = ks.aliases()
+      while (aliases.hasMoreElements()) {
+        val alias = aliases.nextElement()
+        ks.deleteEntry(alias)
+      }
+    } catch (e: Exception) {
+      e.printStackTrace()
+    }
   }
 }
