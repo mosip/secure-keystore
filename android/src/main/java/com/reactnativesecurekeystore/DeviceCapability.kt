@@ -3,13 +3,14 @@ package com.reactnativesecurekeystore
 import android.os.Build
 import android.security.keystore.KeyInfo
 import android.util.Log
+import com.reactnativesecurekeystore.biometrics.Biometrics
 import java.security.GeneralSecurityException
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.crypto.SecretKey
 import javax.crypto.SecretKeyFactory
 
 
-class DeviceCapability(private val secureKeystore: SecureKeystore, private val KeyGenerator: KeyGeneratorImpl) {
+class DeviceCapability(private val secureKeystore: SecureKeystore, private val KeyGenerator: KeyGeneratorImpl, private val biometrics: Biometrics) {
   private val mutex = Object()
 
   @Transient
@@ -59,5 +60,10 @@ class DeviceCapability(private val secureKeystore: SecureKeystore, private val K
       key as SecretKey?,
       KeyInfo::class.java
     ) as KeyInfo
+  }
+
+  /** Get information about Device biometrics enrollment.  */
+  fun hasBiometricsEnabled(): Boolean {
+    return biometrics.isBiometricEnabled()
   }
 }

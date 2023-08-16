@@ -13,7 +13,7 @@ class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContext
   private val cipherBox = CipherBoxImpl()
   private val biometrics = Biometrics(reactContext)
   private val keystore = SecureKeystoreImpl(keyGenerator, cipherBox, biometrics)
-  private val deviceCapability = DeviceCapability(keystore, keyGenerator)
+  private val deviceCapability = DeviceCapability(keystore, keyGenerator, biometrics)
   private val logTag = Util.getLogTag(javaClass.simpleName)
 
   override fun getName(): String {
@@ -100,5 +100,12 @@ class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContext
   @ReactMethod
   fun clearKeys() {
     keystore.removeAllKeys()
+  }
+
+  @ReactMethod(isBlockingSynchronousMethod = true)
+  fun hasBiometricsEnabled(): Boolean {
+    val isEnabled = deviceCapability.hasBiometricsEnabled()
+    Log.d(logTag, "Device biometrics enabled -> $isEnabled")
+    return isEnabled
   }
 }

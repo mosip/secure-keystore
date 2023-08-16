@@ -9,4 +9,5 @@ export interface SecureKeystoreModule {
   sign: (alias: string, data: string) => Promise<string>;
   generateHmacshaKey: (alias: string) => void;
   clearKeys: () => void;
+  hasBiometricsEnabled: () => boolean;
 }

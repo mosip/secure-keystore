@@ -12,7 +12,6 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.UiThreadUtil
 import com.reactnativesecurekeystore.common.Util
 import com.reactnativesecurekeystore.exception.ErrorCode
-import java.security.Key
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import javax.crypto.IllegalBlockSizeException
@@ -46,6 +45,10 @@ class Biometrics(
       Log.e(logTag, "Calling action failed due to other exception", e)
       onFailure(ErrorCode.INTERNAL_ERROR.ordinal, e.message.toString())
     }
+  }
+    fun isBiometricEnabled(): Boolean {
+      val biometricManager = BiometricManager.from(context)
+      return biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) ==  BiometricManager.BIOMETRIC_SUCCESS
   }
 
   private suspend fun authenticate(
