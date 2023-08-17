@@ -1,5 +1,6 @@
 # react-native-secure-keystore
- A React native library helps to securelys store keys
+A React Native module to create and store keys in android hardware keystore and helps to do encryption, decryption, hmac calculation.
+
 ## Installation
 
 ```sh
