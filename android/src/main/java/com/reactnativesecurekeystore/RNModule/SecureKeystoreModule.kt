@@ -35,6 +35,11 @@ class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContext
   }
 
   @ReactMethod(isBlockingSynchronousMethod = true)
+  fun updatePopup(title: String, description: String) {
+    Biometrics.updatePopupDetails(title, description)
+  }
+
+  @ReactMethod(isBlockingSynchronousMethod = true)
   fun generateKey(alias: String, isAuthRequired: Boolean, authTimeout: Int?) {
     Log.d(logTag, "Generating a key for $alias")
 

@@ -25,6 +25,16 @@ class Biometrics(
 ) {
   private val logTag = Util.getLogTag(javaClass.simpleName)
 
+  companion object {
+    var POPUP_TITLE = "Unlock App"
+    var POPUP_DESCRIPTION = "Please use fingerprint to unlock the app"
+
+    fun updatePopupDetails(title: String, description: String) {
+      POPUP_TITLE = title
+      POPUP_DESCRIPTION = description
+    }
+  }
+
   suspend fun authenticateAndPerform(
     createCryptoObject: () -> CryptoObject,
     action: (CryptoObject) -> Unit,
@@ -94,8 +104,8 @@ class Biometrics(
 
   private fun createPromptInfo(): PromptInfo {
     val builder = PromptInfo.Builder()
-      .setTitle("Unlock App")
-      .setDescription("Enter phone screen lock pattern, PIN, password or fingerprint")
+      .setTitle(POPUP_TITLE)
+      .setDescription(POPUP_DESCRIPTION)
       .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
 
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
