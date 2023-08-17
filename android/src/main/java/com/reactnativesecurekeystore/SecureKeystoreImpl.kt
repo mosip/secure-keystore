@@ -164,10 +164,8 @@ class SecureKeystoreImpl(
     val key = ks.getKey(alias, null)
     val keyInfo: KeyInfo = getKeyInfo(key)
 
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
-      if (keyInfo.isInvalidatedByBiometricEnrollment) {
-        throw KeyInvalidatedException("Key Invalidated due to biometric enrollment")
-      }
+    if (keyInfo.isInvalidatedByBiometricEnrollment) {
+      throw KeyInvalidatedException("Key Invalidated due to biometric enrollment")
     }
 
     return key;

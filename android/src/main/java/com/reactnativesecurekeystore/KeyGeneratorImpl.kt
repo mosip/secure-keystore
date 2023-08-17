@@ -5,10 +5,8 @@ import android.security.keystore.KeyGenParameterSpec
 import android.security.keystore.KeyProperties.*
 import android.util.Log
 import com.reactnativesecurekeystore.common.Util
-import java.lang.Exception
 import java.security.KeyPair
 import java.security.KeyPairGenerator
-import java.security.KeyStore
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 
@@ -78,6 +76,8 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
     builder: KeyGenParameterSpec.Builder, authTimeout: Int?
   ) {
     builder.setUserAuthenticationRequired(true)
+    //TODO: Needs to be set back to true once we find a good way to handle invalidation in all supported android versions
+    builder.setInvalidatedByBiometricEnrollment(false)
 
     if (authTimeout != null) {
       setAuthTimeout(builder, authTimeout)
@@ -86,7 +86,7 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
 
   private fun setAuthTimeout(builder: KeyGenParameterSpec.Builder, authTimeout: Int) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-      builder.setUserAuthenticationParameters(authTimeout, AUTH_BIOMETRIC_STRONG)
+      builder.setUserAuthenticationParameters(authTimeout, AUTH_BIOMETRIC_STRONG or AUTH_DEVICE_CREDENTIAL)
     } else {
       builder.setUserAuthenticationValidityDurationSeconds(authTimeout)
     }

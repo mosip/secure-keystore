@@ -1,6 +1,7 @@
 package com.reactnativesecurekeystore.biometrics
 
 import BiometricPromptAuthCallback
+import android.os.Build
 import android.security.keystore.UserNotAuthenticatedException
 import android.util.Log
 import androidx.biometric.BiometricManager
@@ -36,8 +37,7 @@ class Biometrics(
       // If key has timeout based biometric auth requirement, Cipher.Init fails and caught here
       Log.e(logTag, "Calling action failed due to auth exception with user not auth", e)
       authenticate(createCryptoObject, action, false)
-    }
-    catch (e: IllegalBlockSizeException) {
+    } catch (e: IllegalBlockSizeException) {
       // If key has every use biometric auth requirement, Cipher.doFinal fails and caught here
       Log.e(logTag, "Calling action failed due to auth exception", e)
       authenticate(createCryptoObject, action, true)
@@ -46,7 +46,8 @@ class Biometrics(
       onFailure(ErrorCode.INTERNAL_ERROR.ordinal, e.message.toString())
     }
   }
-    fun isBiometricEnabled(): Boolean {
+
+  fun isBiometricEnabled(): Boolean {
       val biometricManager = BiometricManager.from(context)
       return biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) ==  BiometricManager.BIOMETRIC_SUCCESS
   }
@@ -83,10 +84,15 @@ class Biometrics(
   }
 
   private fun createPromptInfo(): PromptInfo {
-    return PromptInfo.Builder()
+    val builder = PromptInfo.Builder()
       .setTitle("Unlock App")
       .setDescription("Enter phone screen lock pattern, PIN, password or fingerprint")
-      .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG or BiometricManager.Authenticators.DEVICE_CREDENTIAL)
-      .build()
+      .setAllowedAuthenticators(BiometricManager.Authenticators.BIOMETRIC_STRONG)
+
+    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
+      builder.setNegativeButtonText("Cancel")
+    }
+
+    return builder.build()
   }
 }
