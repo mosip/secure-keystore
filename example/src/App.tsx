@@ -14,10 +14,13 @@ export default function App() {
     const supHardware = SecureStore.deviceSupportsHardware();
     setSupportsHardware(supHardware);
     console.log('is hardware supported: ' + supHardware);
-    const encryptData = SecureStore.encryptData('key-alias', 'Hi I am Tilak');
-    console.log('encryptedText: ' + encryptData);
-    console.log(
-      'decryptedText: ' + SecureStore.decryptData('key-alias', encryptData)
+    SecureStore.encryptData('key-alias', 'Hi I am Tilak').then(
+      (encryptData) => {
+        console.log('encryptedText: ' + encryptData);
+        console.log(
+          'decryptedText: ' + SecureStore.decryptData('key-alias', encryptData)
+        );
+      }
     );
   });
 

@@ -13,6 +13,7 @@ import com.facebook.react.bridge.ReactApplicationContext
 import com.facebook.react.bridge.UiThreadUtil
 import com.reactnativesecurekeystore.common.Util
 import com.reactnativesecurekeystore.exception.ErrorCode
+import java.security.SignatureException
 import java.util.concurrent.Executor
 import java.util.concurrent.Executors
 import javax.crypto.IllegalBlockSizeException
@@ -37,10 +38,15 @@ class Biometrics(
       // If key has timeout based biometric auth requirement, Cipher.Init fails and caught here
       Log.e(logTag, "Calling action failed due to auth exception with user not auth", e)
       authenticate(createCryptoObject, action, false)
-    } catch (e: IllegalBlockSizeException) {
+    } catch (e: Exception) {
       // If key has every use biometric auth requirement, Cipher.doFinal fails and caught here
-      Log.e(logTag, "Calling action failed due to auth exception", e)
-      authenticate(createCryptoObject, action, true)
+      when (e) {
+        is IllegalBlockSizeException, is SignatureException -> {
+          Log.e(logTag, "Calling action failed due to auth exception", e)
+          authenticate(createCryptoObject, action, true)
+        }
+        else -> throw e
+      }
     } catch (e: Exception) {
       Log.e(logTag, "Calling action failed due to other exception", e)
       onFailure(ErrorCode.INTERNAL_ERROR.ordinal, e.message.toString())
@@ -48,8 +54,8 @@ class Biometrics(
   }
 
   fun isBiometricEnabled(): Boolean {
-      val biometricManager = BiometricManager.from(context)
-      return biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) ==  BiometricManager.BIOMETRIC_SUCCESS
+    val biometricManager = BiometricManager.from(context)
+    return biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS
   }
 
   private suspend fun authenticate(
@@ -61,15 +67,18 @@ class Biometrics(
     return suspendCoroutine { continuation ->
       UiThreadUtil.runOnUiThread {
         try {
-          val fragmentActivity = context.currentActivity ?: throw NullPointerException("Not assigned current activity")
-          val onAuthSuccess:(CryptoObject?) -> Unit = { cryptoObject -> action(cryptoObject ?: createCryptoObject()) }
-          val authCallback: BiometricPrompt.AuthenticationCallback = BiometricPromptAuthCallback(continuation, onAuthSuccess)
+          val fragmentActivity =
+            context.currentActivity ?: throw NullPointerException("Not assigned current activity")
+          val onAuthSuccess: (CryptoObject?) -> Unit =
+            { cryptoObject -> action(cryptoObject ?: createCryptoObject()) }
+          val authCallback: BiometricPrompt.AuthenticationCallback =
+            BiometricPromptAuthCallback(continuation, onAuthSuccess)
           val executor: Executor = Executors.newSingleThreadExecutor()
 
           val promptInfo = createPromptInfo()
           val biometricPrompt = BiometricPrompt(fragmentActivity as FragmentActivity, executor, authCallback)
 
-          if(createCryptoObjectSuccess) {
+          if (createCryptoObjectSuccess) {
             biometricPrompt.authenticate(promptInfo, createCryptoObject())
           } else {
             biometricPrompt.authenticate(promptInfo)

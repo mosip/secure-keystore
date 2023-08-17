@@ -1,7 +1,15 @@
 export interface SecureKeystoreModule {
   deviceSupportsHardware: () => boolean;
-  generateKey: (alias: string, isAuthRequired: boolean, authTimeout?: number) => void;
-  generateKeyPair: (alias: string, isAuthRequired: boolean, authTimeout?: number) => string;
+  generateKey: (
+    alias: string,
+    isAuthRequired: boolean,
+    authTimeout: number
+  ) => void;
+  generateKeyPair: (
+    alias: string,
+    isAuthRequired: boolean,
+    authTimeout: number
+  ) => string;
   hasAlias: (alias: string) => boolean;
   encryptData: (alias: string, data: string) => Promise<string>;
   decryptData: (alias: string, encryptedText: string) => Promise<string>;
