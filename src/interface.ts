@@ -10,13 +10,13 @@ export interface SecureKeystoreModule {
     isAuthRequired: boolean,
     authTimeout: number
   ) => string;
+  generateHmacshaKey: (alias: string) => void;
   hasAlias: (alias: string) => boolean;
   updatePopup: (title: string, description: String) => void;
   encryptData: (alias: string, data: string) => Promise<string>;
   decryptData: (alias: string, encryptedText: string) => Promise<string>;
   generateHmacSha: (alias: string, data: string) => Promise<string>;
   sign: (alias: string, data: string) => Promise<string>;
-  generateHmacshaKey: (alias: string) => void;
   clearKeys: () => void;
   hasBiometricsEnabled: () => boolean;
 }

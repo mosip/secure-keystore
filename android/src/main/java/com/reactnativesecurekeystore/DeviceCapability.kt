@@ -2,6 +2,7 @@ package com.reactnativesecurekeystore
 
 import android.os.Build
 import android.security.keystore.KeyInfo
+import android.security.keystore.KeyProperties
 import android.util.Log
 import com.reactnativesecurekeystore.biometrics.Biometrics
 import java.security.GeneralSecurityException
@@ -10,7 +11,11 @@ import javax.crypto.SecretKey
 import javax.crypto.SecretKeyFactory
 
 
-class DeviceCapability(private val secureKeystore: SecureKeystore, private val KeyGenerator: KeyGeneratorImpl, private val biometrics: Biometrics) {
+class DeviceCapability(
+  private val secureKeystore: SecureKeystore,
+  private val KeyGenerator: KeyGeneratorImpl,
+  private val biometrics: Biometrics
+) {
   private val mutex = Object()
 
   @Transient
@@ -23,7 +28,7 @@ class DeviceCapability(private val secureKeystore: SecureKeystore, private val K
       /** double check if it has value in sync block */
       if (isSupportsSecureHardware != null) return isSupportsSecureHardware!!.get()
       // Check the key stored in secure hardware using temporary key alias, and removed after checked
-      val key = KeyGenerator.generateKey(CHECK_HARDWARE_SUPPORT_KEY_ALIAS,false, null)
+      val key = KeyGenerator.generateKey(CHECK_HARDWARE_SUPPORT_KEY_ALIAS, false, null)
       isSupportsSecureHardware =
         AtomicBoolean(getSecurityLevel(key) == DeviceSecurityLevel.SECURE_HARDWARE)
       Log.i("SecureStorage", "Device Supports Hardware $isSupportsSecureHardware")
@@ -37,18 +42,20 @@ class DeviceCapability(private val secureKeystore: SecureKeystore, private val K
   fun getSecurityLevel(key: SecretKey): DeviceSecurityLevel {
     val keyInfo: KeyInfo = getKeyInfo(key)
 
-    val insideSecureHardware: Boolean = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+    val insideSecureHardware = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
       /** SecurityLevel 1 indicates SECURITY_LEVEL_TRUSTED_ENVIRONMENT
        *  SecurityLevel 2 indicates SECURITY_LEVEL_STRONGBOX */
-      (keyInfo.securityLevel == 1) or (keyInfo.securityLevel == 2)
+      (keyInfo.securityLevel == KeyProperties.SECURITY_LEVEL_TRUSTED_ENVIRONMENT) or
+        (keyInfo.securityLevel == KeyProperties.SECURITY_LEVEL_STRONGBOX)
     } else {
       keyInfo.isInsideSecureHardware()
     }
-    Log.i("keystore", "Device has secure Hardware $insideSecureHardware")
-    if (insideSecureHardware) {
-      return DeviceSecurityLevel.SECURE_HARDWARE
+
+    return if (insideSecureHardware) {
+      DeviceSecurityLevel.SECURE_HARDWARE
+    } else {
+      DeviceSecurityLevel.SECURE_SOFTWARE
     }
-    return DeviceSecurityLevel.SECURE_SOFTWARE
   }
 
   /** Get information about provided key.  */

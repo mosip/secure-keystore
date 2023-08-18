@@ -48,7 +48,7 @@ class CipherBoxImpl : CipherBox {
     try {
       return cipher.doFinal(encryptedOutput.encryptedData);
     } catch (e: Exception) {
-      Log.e("Secure","Exception in Decrypti",e)
+      Log.e("Secure","Exception in Decryption",e)
       throw e
     }
   }
