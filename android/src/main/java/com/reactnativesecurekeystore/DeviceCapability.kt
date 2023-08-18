@@ -5,6 +5,7 @@ import android.security.keystore.KeyInfo
 import android.security.keystore.KeyProperties
 import android.util.Log
 import com.reactnativesecurekeystore.biometrics.Biometrics
+import com.reactnativesecurekeystore.common.Util.Companion.getKeyInfo
 import java.security.GeneralSecurityException
 import java.util.concurrent.atomic.AtomicBoolean
 import javax.crypto.SecretKey
@@ -56,17 +57,6 @@ class DeviceCapability(
     } else {
       DeviceSecurityLevel.SECURE_SOFTWARE
     }
-  }
-
-  /** Get information about provided key.  */
-  @Throws(GeneralSecurityException::class)
-  fun getKeyInfo(key: SecretKey): KeyInfo {
-    Log.i("keystore", "KeyInfo Details$key -> ${key.algorithm}")
-    val secretKeyFactory = SecretKeyFactory.getInstance(key.algorithm, KEYSTORE_TYPE)
-    return secretKeyFactory.getKeySpec(
-      key as SecretKey?,
-      KeyInfo::class.java
-    ) as KeyInfo
   }
 
   /** Get information about Device biometrics enrollment.  */

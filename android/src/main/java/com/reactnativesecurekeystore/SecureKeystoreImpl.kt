@@ -1,6 +1,5 @@
 package com.reactnativesecurekeystore
 
-import android.os.Build
 import android.security.keystore.KeyInfo
 import android.util.Log
 import androidx.biometric.BiometricPrompt.CryptoObject
@@ -13,7 +12,6 @@ import com.reactnativesecurekeystore.exception.InvalidEncryptionText
 import com.reactnativesecurekeystore.exception.KeyInvalidatedException
 import com.reactnativesecurekeystore.exception.KeyNotFound
 import kotlinx.coroutines.runBlocking
-import java.lang.Exception
 import java.security.Key
 import java.security.KeyStore
 import java.security.PrivateKey
