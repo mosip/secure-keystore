@@ -151,5 +151,8 @@
         }
       ]
     ]
+  },
+  "dependencies": {
+    "react-native-secure-keystore": "file:.yalc/react-native-secure-keystore"
   }
 }
