@@ -1,15 +1,12 @@
 package com.reactnativesecurekeystore
 
-import android.security.keystore.KeyInfo
 import android.util.Log
 import androidx.biometric.BiometricPrompt.CryptoObject
 import com.reactnativesecurekeystore.biometrics.Biometrics
 import com.reactnativesecurekeystore.common.PemConverter
-import com.reactnativesecurekeystore.common.Util.Companion.getKeyInfo
 import com.reactnativesecurekeystore.common.Util.Companion.getLogTag
 import com.reactnativesecurekeystore.dto.EncryptedOutput
 import com.reactnativesecurekeystore.exception.InvalidEncryptionText
-import com.reactnativesecurekeystore.exception.KeyInvalidatedException
 import com.reactnativesecurekeystore.exception.KeyNotFound
 import kotlinx.coroutines.runBlocking
 import java.security.Key
@@ -23,9 +20,6 @@ class SecureKeystoreImpl(
   private var ks: KeyStore = KeyStore.getInstance(KEYSTORE_TYPE)
   private val logTag = getLogTag(javaClass.simpleName)
 
-  init {
-    ks.load(null)
-  }
 
   /**  Generate secret key and store it in AndroidKeystore */
   override fun generateKey(alias: String, isAuthRequired: Boolean, authTimeout: Int?) {
@@ -45,12 +39,16 @@ class SecureKeystoreImpl(
 
   /** Remove key with provided name from security storage.  */
   override fun removeKey(alias: String) {
+    ks.load(null)
+
     if (ks.containsAlias(alias)) {
       ks.deleteEntry(alias)
     }
   }
 
   override fun hasAlias(alias: String): Boolean {
+    ks.load(null)
+
     if (ks.containsAlias(alias)) {
       return true
     }
@@ -156,17 +154,13 @@ class SecureKeystoreImpl(
   }
 
   private fun getKeyOrThrow(alias: String): Key {
+    ks.load(null)
+
     if (!ks.containsAlias(alias)) {
       throw KeyNotFound("Key not found for the alias: $alias")
     }
-    val key = ks.getKey(alias, null)
-    val keyInfo: KeyInfo = getKeyInfo(key)
 
-    if (keyInfo.isInvalidatedByBiometricEnrollment) {
-      throw KeyInvalidatedException("Key Invalidated due to biometric enrollment")
-    }
-
-    return key;
+    return ks.getKey(alias, null);
   }
 
   override fun removeAllKeys() {

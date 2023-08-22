@@ -7,6 +7,7 @@ import com.facebook.react.bridge.ReactContextBaseJavaModule
 import com.facebook.react.bridge.ReactMethod
 import com.reactnativesecurekeystore.biometrics.Biometrics
 import com.reactnativesecurekeystore.common.Util
+import kotlin.math.log
 
 class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
   private val keyGenerator = KeyGeneratorImpl()
@@ -102,7 +103,7 @@ class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContext
       onFailure = { code, message -> run { promise.reject(code.toString(), message) } })
   }
 
-  @ReactMethod
+  @ReactMethod(isBlockingSynchronousMethod = true)
   fun clearKeys() {
     keystore.removeAllKeys()
   }

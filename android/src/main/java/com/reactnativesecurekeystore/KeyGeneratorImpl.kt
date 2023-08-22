@@ -84,9 +84,12 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
 
   private fun setAuthTimeout(builder: KeyGenParameterSpec.Builder, authTimeout: Int) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-      builder.setUserAuthenticationParameters(authTimeout, AUTH_BIOMETRIC_STRONG or AUTH_DEVICE_CREDENTIAL)
+      if(authTimeout != 0) {
+        builder.setUserAuthenticationParameters(authTimeout, AUTH_BIOMETRIC_STRONG)
+      }
     } else {
-      builder.setUserAuthenticationValidityDurationSeconds(authTimeout)
+      val timeout = if(authTimeout == 0) -1 else authTimeout
+      builder.setUserAuthenticationValidityDurationSeconds(timeout)
     }
   }
 }
