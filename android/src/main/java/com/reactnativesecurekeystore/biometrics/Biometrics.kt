@@ -58,7 +58,7 @@ class Biometrics(
           authenticate(createCryptoObject, action, true)
         }
         is KeyPermanentlyInvalidatedException -> {
-           throw KeyInvalidatedException("Key Invalidated due to biometric enrollment")
+          throw KeyInvalidatedException()
         }
         else -> throw e
       }
