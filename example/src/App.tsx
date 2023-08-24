@@ -14,7 +14,7 @@ export default function App() {
     const supHardware = SecureStore.deviceSupportsHardware();
     setSupportsHardware(supHardware);
     console.log('is hardware supported: ' + supHardware);
-    SecureStore.encryptData('key-alias', 'Hi I am Tilak').then(
+    SecureStore.encryptData('key-alias', 'Hi I am a Developer').then(
       (encryptData) => {
         console.log('encryptedText: ' + encryptData);
         console.log(
