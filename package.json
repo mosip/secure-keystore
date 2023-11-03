@@ -1,5 +1,5 @@
 {
-  "name": "react-native-secure-keystore",
+  "name": "@mosip/react-native-secure-keystore",
   "version": "0.1.1",
   "description": "test",
   "main": "lib/commonjs/index",
