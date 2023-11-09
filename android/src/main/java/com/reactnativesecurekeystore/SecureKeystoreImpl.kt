@@ -121,10 +121,10 @@ class SecureKeystoreImpl(
     val key = getKeyOrThrow(alias) as PrivateKey
 
     runBlocking {
-      val createCryptoObject = { CryptoObject(cipherBox.createSignature(key, data)) }
+      val createCryptoObject = { CryptoObject(cipherBox.createSignature(key)) }
 
       val action = { cryptoObject: CryptoObject ->
-        val signatureText = cipherBox.sign(cryptoObject.signature!!)
+        val signatureText = cipherBox.sign(cryptoObject.signature!!, data)
         onSuccess(signatureText)
       }
 
@@ -160,7 +160,7 @@ class SecureKeystoreImpl(
       throw KeyNotFound("Key not found for the alias: $alias")
     }
 
-    return ks.getKey(alias, null);
+    return ks.getKey(alias, null)
   }
 
   override fun removeAllKeys() {
