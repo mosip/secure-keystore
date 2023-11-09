@@ -30,7 +30,7 @@ class CipherBoxImpl : CipherBox {
 
   override fun encryptData(cipher: Cipher, data: String): EncryptedOutput {
     Log.d("CipherBox", "iv ${cipher.iv} data: $data" )
-    val encryptedData = cipher.doFinal(data.toByteArray());
+    val encryptedData = cipher.doFinal(data.toByteArray())
 
     return EncryptedOutput(encryptedData, cipher.iv)
   }
@@ -46,31 +46,33 @@ class CipherBoxImpl : CipherBox {
 
   override fun decryptData(cipher: Cipher, encryptedOutput: EncryptedOutput): ByteArray {
     try {
-      return cipher.doFinal(encryptedOutput.encryptedData);
+      return cipher.doFinal(encryptedOutput.encryptedData)
     } catch (e: Exception) {
       Log.e("Secure","Exception in Decryption",e)
       throw e
     }
   }
 
-  override fun createSignature(key: PrivateKey, data: String): Signature {
-    val bytes = data.toByteArray(charset("UTF8"))
+  override fun createSignature(key: PrivateKey): Signature {
     val signature = Signature.getInstance(SIGN_ALGORITHM).run {
       initSign(key)
-      update(bytes)
       this
     }
 
     return signature
   }
 
-  override fun sign(signature: Signature): String {
-    val sign = signature.sign()
+  override fun sign(signature: Signature, data: String): String {
+    val bytes = data.toByteArray(charset("UTF8"))
+    val sign = signature.run {
+      update(bytes)
+      sign()
+    }
     return Base64.encodeToString(sign, Base64.DEFAULT)
   }
 
   override fun generateHmacSha(key: SecretKey, data: String): ByteArray {
-    val mac = Mac.getInstance(HMAC_ALGORITHM);
+    val mac = Mac.getInstance(HMAC_ALGORITHM)
 
     try {
       mac.init(key)
