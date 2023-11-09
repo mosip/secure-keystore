@@ -118,21 +118,27 @@ class SecureKeystoreImpl(
     alias: String, data: String,
     onSuccess: (signature: String) -> Unit, onFailure: (code: Int, message: String) -> Unit
   ) {
-    val key = getKeyOrThrow(alias) as PrivateKey
+    try {
+      val key = getKeyOrThrow(alias) as PrivateKey
 
-    runBlocking {
-      val createCryptoObject = { CryptoObject(cipherBox.createSignature(key)) }
+      runBlocking {
+        val createCryptoObject = { CryptoObject(cipherBox.createSignature(key)) }
 
-      val action = { cryptoObject: CryptoObject ->
-        val signatureText = cipherBox.sign(cryptoObject.signature!!, data)
-        onSuccess(signatureText)
+        val action = { cryptoObject: CryptoObject ->
+          val signatureText = cipherBox.sign(cryptoObject.signature!!, data)
+          onSuccess(signatureText)
+        }
+
+        biometrics.authenticateAndPerform(
+          createCryptoObject,
+          action,
+          onFailure
+        )
       }
+    } catch (e: RuntimeException) {
+      Log.e(logTag, "Exception in sign creation: ", e)
 
-      biometrics.authenticateAndPerform(
-        createCryptoObject,
-        action,
-        onFailure
-      )
+      onFailure(e.hashCode(), e.message.toString())
     }
   }
 
