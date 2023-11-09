@@ -63,12 +63,17 @@ class CipherBoxImpl : CipherBox {
   }
 
   override fun sign(signature: Signature, data: String): String {
-    val bytes = data.toByteArray(charset("UTF8"))
-    val sign = signature.run {
-      update(bytes)
-      sign()
+    try {
+      val bytes = data.toByteArray(charset("UTF8"))
+      val sign = signature.run {
+        update(bytes)
+        sign()
+      }
+      return Base64.encodeToString(sign, Base64.DEFAULT)
+    } catch (e: Exception) {
+      Log.e("CipherBox", "Exception in sign creation", e)
+      throw e
     }
-    return Base64.encodeToString(sign, Base64.DEFAULT)
   }
 
   override fun generateHmacSha(key: SecretKey, data: String): ByteArray {
