@@ -51,8 +51,7 @@
   },
   "homepage": "https://github.com/mosip/secure-keystore#readme",
   "publishConfig": {
-    "registry": "https://registry.npmjs.org/",
-    "private": false
+    "registry": "https://registry.npmjs.org/"
   },
   "devDependencies": {
     "@arkweid/lefthook": "^0.7.7",
