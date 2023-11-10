@@ -1,5 +1,5 @@
 {
-  "name": "react-native-secure-keystore",
+  "name": "mosip-react-native-secure-keystore",
   "version": "0.1.1",
   "description": "test",
   "main": "lib/commonjs/index",
@@ -27,6 +27,8 @@
     "!**/.*"
   ],
   "scripts": {
+    "verify": "npm run verify:android",
+    "verify:android": "cd android && ./gradlew clean build test && cd ..",
     "test": "jest",
     "typescript": "tsc --noEmit",
     "lint": "eslint \"**/*.{js,ts,tsx}\"",
@@ -41,13 +43,13 @@
     "ios",
     "android"
   ],
-  "repository": "https://github.com/tw-mosip/secure-keystore",
+  "repository": "https://github.com/mosip/secure-keystore",
   "author": "MOSIP <dev@mosip.io> (https://mosip.io/)",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/tw-mosip/secure-keystore/issues"
+    "url": "https://github.com/mosip/secure-keystore/issues"
   },
-  "homepage": "https://github.com/tw-mosip/secure-keystore#readme",
+  "homepage": "https://github.com/mosip/secure-keystore#readme",
   "publishConfig": {
     "registry": "https://registry.npmjs.org/"
   },
