@@ -1,6 +1,6 @@
 {
-  "name": "mosip-react-native-secure-keystore",
-  "version": "0.1.2",
+  "name": "@mosip/secure-keystore",
+  "version": "0.1.3",
   "description": "test",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
