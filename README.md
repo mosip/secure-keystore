@@ -6,7 +6,7 @@ A React Native module to create and store keys in android hardware keystore and 
 ## Installation
 
 ```sh
-npm install react-native-secure-keystore
+npm install @mosip/secure-keystore
 ```
 
 ## Usage
@@ -14,7 +14,7 @@ npm install react-native-secure-keystore
 1. for RSA based Key Pair
 
 ```js
-import SecureKeyStore  from "react-native-secure-keystore";
+import SecureKeyStore  from "@mosip/secure-keystore";
 
 // ...
 
@@ -35,7 +35,7 @@ const signature = await SecureKeyStore.sign(alias, data)
 2. for symmetric key
 
 ```js
-import SecureKeyStore  from "react-native-secure-keystore";
+import SecureKeyStore  from "@mosip/secure-keystore";
 
 // ...
 
