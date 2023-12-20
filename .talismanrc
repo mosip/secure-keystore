@@ -84,9 +84,9 @@ fileignoreconfig:
 - filename: example/src/App.tsx
   checksum: c68ada1087d874ed641498e6a1bf4ff8ded6397c610ff0c64161e6843531038f
 - filename: .github/workflows/push-trigger.yml
-  checksum: 5f14b452b43794bc91ab7b10b8d9f0d6e9ab96f22f802d8b7552c5e6a409515d
+  checksum: 03350c696efffe7eb78b75e2bec9bd8b3fcdf2dabb74f99fc9276497882f4b60
 - filename: secure-keystore.podspec
   checksum: d5c6ca11845a0fa96383910a485d30207a9657e875b1ba82ac1a641ffc284469
 - filename: package.json
-  checksum: dd81ad5d3f5fb2690848c93a6049e3f615e6a047ff1c118379a608e4dd4737ae
+  checksum: 14ad4b2326ad6de7e0729353596d0182b5120729afd301858ca952ba90959721
 version: ""
