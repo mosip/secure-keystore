@@ -87,4 +87,6 @@ fileignoreconfig:
   checksum: 5f14b452b43794bc91ab7b10b8d9f0d6e9ab96f22f802d8b7552c5e6a409515d
 - filename: secure-keystore.podspec
   checksum: d5c6ca11845a0fa96383910a485d30207a9657e875b1ba82ac1a641ffc284469
+- filename: package.json
+  checksum: dd81ad5d3f5fb2690848c93a6049e3f615e6a047ff1c118379a608e4dd4737ae
 version: ""
