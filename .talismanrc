@@ -56,9 +56,9 @@ fileignoreconfig:
 - filename: example/README.md
   checksum: c00983c83d866067f0ee46e97e596a8b4b6118cb3f34be4b0606c5e6f0717d44
 - filename: android/gradle.properties
-  checksum: 36d0e9447c7360e7040ff56cd782e9b8e6e67eed1c8a3299d0b612308bbc6437
+  checksum: d10638b0caf4649f422820ae33bcff6df464a1c51a0eadfa611105ddd68fa820
 - filename: README.md
-  checksum: 6e6d8134da3d000a306125a71664b0e45eb61d1f7c2a152c8518c42e01342bdb
+  checksum: f9b33069440b3ac14a541239c29f3a58463d11ef1f737df228a1888df0697549
 - filename: CONTRIBUTING.md
   checksum: 64facdd299baf8d7e5f921e9caaff3848327f4e366b24a1829a4420ed5960c66
 - filename: example/ios/SecureKeystoreExample/Info.plist
@@ -75,8 +75,6 @@ fileignoreconfig:
   checksum: 216a430333aa0e26d055ff9cb2523b0b1b9b8b23665e68c5e2cb0fae8cd13b03
 - filename: tsconfig.json
   checksum: 5c573bcd7fb7cdffdc83d2f6f8675d67cf2ca1344ed5b50e8e9e3aa22190bb56
-- filename: react-native-secure-keystore.podspec
-  checksum: 669d9202e4a08eb296769124f5e854382664b2a7eb1a05d9e06c36d3bdcc8a84
 - filename: example/ios/SecureKeystoreExampleTests/Info.plist
   checksum: a72feafd0e9dd17155ca6c51c8cebce79178cf756dda66e89de8b14b160e431e
 - filename: src/index.tsx
@@ -85,4 +83,10 @@ fileignoreconfig:
   checksum: 607b7c4075f37c46d4dac4003691f227b53f9ae1d969439f532280c16fe71388
 - filename: example/src/App.tsx
   checksum: c68ada1087d874ed641498e6a1bf4ff8ded6397c610ff0c64161e6843531038f
+- filename: .github/workflows/push-trigger.yml
+  checksum: 5f14b452b43794bc91ab7b10b8d9f0d6e9ab96f22f802d8b7552c5e6a409515d
+- filename: secure-keystore.podspec
+  checksum: d5c6ca11845a0fa96383910a485d30207a9657e875b1ba82ac1a641ffc284469
+- filename: package.json
+  checksum: dd81ad5d3f5fb2690848c93a6049e3f615e6a047ff1c118379a608e4dd4737ae
 version: ""
