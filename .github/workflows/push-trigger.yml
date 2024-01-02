@@ -42,7 +42,7 @@ jobs:
 
   # sonar-analysis-secure-keystore:
   #   if: "${{ github.event_name != 'pull_request' }}"
-  #   needs: build-secure-keystore
+  #   needs: build-secure-keystore 
   #   uses: mosip/kattu/.github/workflows/gradlew-sonar-analysis.yml@master
   #   with:
   #     SERVICE_LOCATION: '.'
