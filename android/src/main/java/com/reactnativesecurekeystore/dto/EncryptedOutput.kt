@@ -14,14 +14,13 @@ class EncryptedOutput {
   }
 
   constructor(encryptedOutput: String) {
-    val ivString = encryptedOutput.take(IV_SIZE)
-    val encryptedString = encryptedOutput.drop(IV_SIZE)
-    this.iv = Base64.decode(ivString, Base64.DEFAULT)
-    this.encryptedData = Base64.decode(encryptedString, Base64.DEFAULT)
+    val cipherText = Base64.decode(encryptedOutput, Base64.DEFAULT)
+    this.iv = cipherText.take(IV_SIZE).toByteArray()
+    this.encryptedData = cipherText.drop(IV_SIZE).toByteArray()
   }
 
   override fun toString(): String {
-    return Base64.encodeToString(iv, Base64.DEFAULT) + Base64.encodeToString(encryptedData, Base64.DEFAULT)
+    return Base64.encodeToString(iv.plus(encryptedData), Base64.DEFAULT)
   }
 
   companion object {
