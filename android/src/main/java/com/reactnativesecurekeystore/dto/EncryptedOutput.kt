@@ -2,7 +2,7 @@ package com.reactnativesecurekeystore.dto
 
 import android.util.Base64
 
-const val IV_SIZE = 16
+const val IV_SIZE = 12
 
 class EncryptedOutput {
   var iv: ByteArray
