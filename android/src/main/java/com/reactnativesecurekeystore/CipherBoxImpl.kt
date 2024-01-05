@@ -29,8 +29,7 @@ class CipherBoxImpl : CipherBox {
   }
 
   override fun encryptData(cipher: Cipher, data: String): EncryptedOutput {
-    Log.d("CipherBox", "iv ${cipher.iv} data: $data" )
-    val encryptedData = cipher.doFinal(data.toByteArray())
+    val encryptedData = cipher.doFinal(data.toByteArray(), 0, data.toByteArray().size)
 
     return EncryptedOutput(encryptedData, cipher.iv)
   }
@@ -46,7 +45,7 @@ class CipherBoxImpl : CipherBox {
 
   override fun decryptData(cipher: Cipher, encryptedOutput: EncryptedOutput): ByteArray {
     try {
-      return cipher.doFinal(encryptedOutput.encryptedData)
+      return cipher.doFinal(encryptedOutput.encryptedData, 0, encryptedOutput.encryptedData.size)
     } catch (e: Exception) {
       Log.e("Secure","Exception in Decryption",e)
       throw e
