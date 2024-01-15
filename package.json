@@ -1,6 +1,6 @@
 {
   "name": "@mosip/secure-keystore",
-  "version": "0.1.5",
+  "version": "0.1.6",
   "description": "React Native module to manage keys for encryption, decryption in android hardware keystore.",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -45,7 +45,7 @@
   ],
   "repository": "https://github.com/mosip/secure-keystore",
   "author": "MOSIP <dev@mosip.io> (https://mosip.io/)",
-  "license": "MIT",
+  "license": "MPL-2.0",
   "bugs": {
     "url": "https://github.com/mosip/secure-keystore/issues"
   },
