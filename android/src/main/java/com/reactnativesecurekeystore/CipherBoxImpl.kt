@@ -29,7 +29,8 @@ class CipherBoxImpl : CipherBox {
   }
 
   override fun encryptData(cipher: Cipher, data: String): EncryptedOutput {
-    val encryptedData = cipher.doFinal(data.toByteArray(), 0, data.toByteArray().size)
+    val decodedData = Base64.decode(data, Base64.DEFAULT)
+    val encryptedData = cipher.doFinal(decodedData, 0, decodedData.size)
 
     return EncryptedOutput(encryptedData, cipher.iv)
   }
