@@ -1,6 +1,6 @@
 {
   "name": "@mosip/secure-keystore",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "React Native module to manage keys for encryption, decryption in android hardware keystore.",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
