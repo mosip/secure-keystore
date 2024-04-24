@@ -149,3 +149,5 @@ if (isNewArchitectureEnabled()) {
     codegenJavaPackageName = "com.reactnativesecurekeystore"
   }
 }
+
+apply from: "publish-artifact.gradle"
