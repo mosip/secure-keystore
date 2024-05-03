@@ -1,14 +1,11 @@
-def usernameValue = System.getenv("OSSRH_USER")
-def passwordValue = System.getenv("OSSRH_SECRET")
-def urlValue = System.getenv("OSSRH_URL")
 publishing {
   repositories {
     maven {
-      url = urlValue
+      url = System.getenv("OSSRH_URL")
       name = "secure-keystore"
       credentials {
-        username = usernameValue
-        password = passwordValue
+        username = System.getenv("OSSRH_USER")
+        password = System.getenv("OSSRH_SECRET")
       }
     }
   }
@@ -82,8 +79,13 @@ publishing {
       }
       groupId = "io.mosip"
       artifactId = "secure-keystore"
-      version = "1.0"
-      artifact("build/outputs/aar/android-release.aar")
+      version = "1.0-SNAPSHOT"
+      artifacts {
+        aar {
+          archivesBaseName = "${artifactId}-${version}"
+        }
+      }
+      artifact("build/outputs/aar/${archivesBaseName}-release.aar")
     }
   }
 }
