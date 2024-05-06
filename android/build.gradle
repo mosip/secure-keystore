@@ -1,3 +1,8 @@
+apply plugin: 'com.android.library'
+apply plugin: 'kotlin-android'
+apply plugin: 'org.sonarqube'
+apply plugin: 'maven-publish'
+
 buildscript {
   // Buildscript is evaluated before everything else so we can't use getExtOrDefault
   def kotlin_version = rootProject.ext.has('kotlinVersion') ? rootProject.ext.get('kotlinVersion') : project.properties['SecureKeystore_kotlinVersion']
@@ -18,10 +23,6 @@ buildscript {
 def isNewArchitectureEnabled() {
   return rootProject.hasProperty("newArchEnabled") &&  rootProject.getProperty("newArchEnabled") == "true"
 }
-
-apply plugin: 'com.android.library'
-apply plugin: 'kotlin-android'
-apply plugin: 'org.sonarqube'
 
 if (isNewArchitectureEnabled()) {
   apply plugin: 'com.facebook.react'
@@ -149,3 +150,5 @@ if (isNewArchitectureEnabled()) {
     codegenJavaPackageName = "com.reactnativesecurekeystore"
   }
 }
+
+apply from: "publish-artifact.gradle"
