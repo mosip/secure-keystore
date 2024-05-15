@@ -10,7 +10,7 @@ import java.security.KeyPairGenerator
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
 
-const val KEY_PAIR_KEY_SIZE = 4096
+const val KEY_PAIR_KEY_SIZE = 1024
 
 class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
   private val keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM_AES, KEYSTORE_TYPE)

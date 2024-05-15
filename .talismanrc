@@ -42,7 +42,7 @@ fileignoreconfig:
 - filename: android/src/main/java/com/reactnativesecurekeystore/RNModule/SecureKeystorePackage.kt
   checksum: 32a3a44547f9220c90f7c771f9e4db17a267b4ade6aa7ba93446c71617f7aad1
 - filename: android/src/main/java/com/reactnativesecurekeystore/KeyGeneratorImpl.kt
-  checksum: 29a09dbe2024daed5964f1b8770d843cdcbd4fd91a9d66fc9d2c60c0be4fcd45
+  checksum: b5d04f7b1becb5e6197468a34c7cbdf2484e1a8f3a55d4e37a918abf1098db5e
 - filename: example/android/app/build.gradle
   checksum: 8b1e52337b5be4e0a37aba338e9d7e2f00265ec94de6321c8b63bbbc62f05111
 - filename: android/src/main/java/com/reactnativesecurekeystore/SecureKeystore.kt
@@ -52,13 +52,13 @@ fileignoreconfig:
 - filename: android/src/main/java/com/reactnativesecurekeystore/SecureKeystoreImpl.kt
   checksum: 50804989cbfed08a889ec2ce0fefa50f82197194b2680eee2ef9ab5b0b851644
 - filename: android/src/main/java/com/reactnativesecurekeystore/CipherBoxImpl.kt
-  checksum: 4d3849e577fbada849a81624dd6d4282d07b7a6b6f7f8c8a7729ef10c048a739
+  checksum: 65226cdec4a8e0d715abd5841bef56d9c3f830263a2a7d189ec7bb8ae6d65580
 - filename: example/README.md
   checksum: c00983c83d866067f0ee46e97e596a8b4b6118cb3f34be4b0606c5e6f0717d44
 - filename: android/gradle.properties
   checksum: d10638b0caf4649f422820ae33bcff6df464a1c51a0eadfa611105ddd68fa820
 - filename: README.md
-  checksum: f9b33069440b3ac14a541239c29f3a58463d11ef1f737df228a1888df0697549
+  checksum: 2c8b572827fcf5015bcd957f149a62773031c9f72c133a2021a7b94068680cb8
 - filename: CONTRIBUTING.md
   checksum: 64facdd299baf8d7e5f921e9caaff3848327f4e366b24a1829a4420ed5960c66
 - filename: example/ios/SecureKeystoreExample/Info.plist
@@ -84,9 +84,13 @@ fileignoreconfig:
 - filename: example/src/App.tsx
   checksum: c68ada1087d874ed641498e6a1bf4ff8ded6397c610ff0c64161e6843531038f
 - filename: .github/workflows/push-trigger.yml
-  checksum: 03350c696efffe7eb78b75e2bec9bd8b3fcdf2dabb74f99fc9276497882f4b60
+  checksum: 581ea0f1424f950877379e3cc38ab9078dfb48814700113e2beff72055d29cb3
 - filename: secure-keystore.podspec
   checksum: d5c6ca11845a0fa96383910a485d30207a9657e875b1ba82ac1a641ffc284469
 - filename: package.json
-  checksum: 14ad4b2326ad6de7e0729353596d0182b5120729afd301858ca952ba90959721
+  checksum: 3b33e8a66129f21d4ed69d74b1efd9406fc08450b9897299eab9c19dc72fef2d
+- filename: .github/workflows/android-artifact-build.yml
+  checksum: 5a3e87e89f7237f49f4e1f9c03deb1cafa5528dec0d447a46ae8f65700210b90
+- filename: android/publish-artifact.gradle
+  checksum: 0aaae1ad463fb4f6e0e9e5b2a71a1258aa0684c6478e52cf6771e80a6697e2e0
 version: ""
