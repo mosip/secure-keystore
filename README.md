@@ -44,11 +44,11 @@ if(!SecureKeyStore.deviceSupportsHardware) {
 }
 
 const alias = "1234ab";
-const data = "any data";
+const base64EncodedData = encodeToBase64("any data");
 
 await SecureKeyStore.generateKey(alias);
 
-const encryptedData = await SecureKeyStore.encryptData(alias, data)
+const encryptedData = await SecureKeyStore.encryptData(alias, base64EncodedData)
 const decryptedData = await SecureKeyStore.decryptData(alias, encryptedData)
 
 ```
@@ -79,7 +79,7 @@ generates a asymmetric RSA key Pair for signing
 
 `encryptData(alias: string, data: string) => string`
 
-Encrypts the given data using the key that is assigned to the alias. Returns back encrypted data as a string
+Encrypts the given data(encoded in base64) using the key that is assigned to the alias. Returns back encrypted data as a string
 
 ### decryptData
 
@@ -106,7 +106,7 @@ See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the 
 
 ## License
 
-MIT
+MPL-2.0
 
 ---
 
