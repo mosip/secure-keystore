@@ -1,15 +1,39 @@
-# react-native-secure-keystore
-A React Native module to create and store keys in android hardware keystore and helps to do encryption, decryption, and hmac calculation.
+# secure-keystore
+A module to create and store keys in android hardware keystore and helps to do encryption, decryption, and hmac calculation.
 
 `note: This library only supported for android.`
 
-## Installation
+## Usage as a Kotlin library (for native android)
+The secure-keystore kotlin artifact (.aar) has been published to Maven.
+### Adding as a Maven dependency.
+- In settings.gradle.kts of your app modify the following:
+  ```
+       dependencyResolutionManagement {
+       repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+       repositories {
+         google()
+         mavenCentral()
+         maven("https://oss.sonatype.org/content/repositories/snapshots/")
+       }
+     }
+  ```
+- In your app's build.gradle.kts add the following:
+  ```kotlin
+     dependencies {
+           implementation("io.mosip:secure-keystore:1.0-SNAPSHOT")
+     }
+  ```
+ The kotlin library has been added to your project.
+
+## Usage as a React-Native wrapper
+
+### Installation
 
 ```sh
 npm install @mosip/secure-keystore
 ```
 
-## Usage
+## API Documentation
 
 1. for RSA based Key Pair
 
@@ -110,4 +134,3 @@ MPL-2.0
 
 ---
 
-Made with [create-react-native-library](https://github.com/callstack/react-native-builder-bob)
