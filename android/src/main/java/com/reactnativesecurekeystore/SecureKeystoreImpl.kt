@@ -28,8 +28,13 @@ class SecureKeystoreImpl(
 
   /** Generate a new key pair */
   override fun generateKeyPair(alias: String, isAuthRequired: Boolean, authTimeout: Int?): String {
-    val keyPair = keyGenerator.generateKeyPair(alias, isAuthRequired, authTimeout)
+      val keyPair = keyGenerator.generateKeyPair(alias, isAuthRequired, authTimeout)
+      return PemConverter(keyPair.public).toPem()
+  }
 
+  override fun generateKeyPairEC(alias: String, isAuthRequired: Boolean, authTimeout: Int?): String {
+    val keyPair = keyGenerator.generateKeyPairEC(alias, isAuthRequired, authTimeout)
+    Log.d("keytest",PemConverter(keyPair.public).toPem())
     return PemConverter(keyPair.public).toPem()
   }
 
@@ -115,6 +120,7 @@ class SecureKeystoreImpl(
   }
 
   override fun sign(
+    signAlgorithm:String,
     alias: String, data: String,
     onSuccess: (signature: String) -> Unit, onFailure: (code: Int, message: String) -> Unit
   ) {
@@ -122,7 +128,7 @@ class SecureKeystoreImpl(
       val key = getKeyOrThrow(alias) as PrivateKey
 
       runBlocking {
-        val createCryptoObject = { CryptoObject(cipherBox.createSignature(key)) }
+        val createCryptoObject = { CryptoObject(cipherBox.createSignature(key,signAlgorithm)) }
 
         val action = { cryptoObject: CryptoObject ->
           val signatureText = cipherBox.sign(cryptoObject.signature!!, data)

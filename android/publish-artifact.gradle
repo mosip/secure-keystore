@@ -79,7 +79,7 @@ publishing {
       }
       groupId = "io.mosip"
       artifactId = "secure-keystore"
-      version = "1.2-SNAPSHOT"
+      version = "1.3-SNAPSHOT"
       if (project.gradle.startParameter.taskNames.any { it.contains('assembleRelease') }) {
         artifacts {
           aar {

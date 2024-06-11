@@ -16,7 +16,7 @@ import javax.crypto.spec.GCMParameterSpec
 const val CIPHER_ALGORITHM =
   "${KeyProperties.KEY_ALGORITHM_AES}/${KeyProperties.BLOCK_MODE_GCM}/${KeyProperties.ENCRYPTION_PADDING_NONE}"
 const val GCM_TAG_LEN = 128
-const val SIGN_ALGORITHM = "SHA256with${KeyProperties.KEY_ALGORITHM_RSA}"
+val signAlgorithm = "SHA256withRSA"
 const val HMAC_ALGORITHM = "HmacSHA256"
 
 class CipherBoxImpl : CipherBox {
@@ -53,8 +53,8 @@ class CipherBoxImpl : CipherBox {
     }
   }
 
-  override fun createSignature(key: PrivateKey): Signature {
-    val signature = Signature.getInstance(SIGN_ALGORITHM).run {
+  override fun createSignature(key: PrivateKey,signAlgorithm: String): Signature {
+    val signature = Signature.getInstance(signAlgorithm).run {
       initSign(key)
       this
     }

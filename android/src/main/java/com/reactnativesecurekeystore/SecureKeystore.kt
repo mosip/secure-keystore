@@ -3,6 +3,7 @@ package com.reactnativesecurekeystore
 interface SecureKeystore {
   fun hasAlias(alias: String): Boolean
   fun generateKeyPair(alias: String, isAuthRequired: Boolean, authTimeout: Int?): String
+  fun generateKeyPairEC(alias: String, isAuthRequired: Boolean, authTimeout: Int?): String
   fun generateKey(alias: String, isAuthRequired: Boolean, authTimeout: Int?)
   fun removeKey(alias: String)
 
@@ -20,6 +21,7 @@ interface SecureKeystore {
   )
 
   fun sign(
+    signAlgorithm:String,
     alias: String,
     data: String,
     onSuccess: (signature: String) -> Unit,

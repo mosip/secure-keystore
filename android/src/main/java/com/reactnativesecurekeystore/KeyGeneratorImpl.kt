@@ -9,12 +9,14 @@ import java.security.KeyPair
 import java.security.KeyPairGenerator
 import javax.crypto.KeyGenerator
 import javax.crypto.SecretKey
+import java.security.spec.ECGenParameterSpec
 
 const val KEY_PAIR_KEY_SIZE = 2048
 
 class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
   private val keyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM_AES, KEYSTORE_TYPE)
   private val keyPairGenerator = KeyPairGenerator.getInstance(KEY_ALGORITHM_RSA, KEYSTORE_TYPE)
+  private val keyPairGeneratorEC = KeyPairGenerator.getInstance(KEY_ALGORITHM_EC, KEYSTORE_TYPE)
   private val hmacKeyGenerator = KeyGenerator.getInstance(KEY_ALGORITHM_HMAC_SHA256, KEYSTORE_TYPE)
   private val logTag = Util.getLogTag(javaClass.simpleName)
 
@@ -45,6 +47,19 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
     return keyPairGenerator.generateKeyPair()
   }
 
+    override fun generateKeyPairEC(alias: String, isAuthRequired: Boolean, authTimeout: Int?): KeyPair {
+    val keySpecBuilder = getKeyPairGenSpecBuilderEC(alias)
+
+    if (isAuthRequired) {
+      setUserAuth(keySpecBuilder, authTimeout)
+    }
+
+      keyPairGeneratorEC.initialize(keySpecBuilder.build())
+
+    return keyPairGeneratorEC.generateKeyPair()
+  }
+
+
   override fun generateHmacKey(hmacKeyAlias: String): SecretKey {
     val keyGenParameterSpec = KeyGenParameterSpec.Builder(hmacKeyAlias, PURPOSE_SIGN).build()
 
@@ -70,6 +85,12 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
       .setDigests(DIGEST_SHA256, DIGEST_SHA512)
       .setEncryptionPaddings(ENCRYPTION_PADDING_RSA_PKCS1)
       .setSignaturePaddings(SIGNATURE_PADDING_RSA_PKCS1)
+  }
+
+  private fun getKeyPairGenSpecBuilderEC(alias: String): KeyGenParameterSpec.Builder {
+    val purposes = PURPOSE_ENCRYPT or PURPOSE_DECRYPT or PURPOSE_SIGN or PURPOSE_VERIFY
+      return KeyGenParameterSpec.Builder(alias, purposes)
+        .setDigests(DIGEST_SHA256,DIGEST_SHA512)
   }
 
   private fun setUserAuth(
