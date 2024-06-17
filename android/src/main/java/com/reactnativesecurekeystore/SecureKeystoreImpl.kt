@@ -131,7 +131,7 @@ class SecureKeystoreImpl(
         val createCryptoObject = { CryptoObject(cipherBox.createSignature(key,signAlgorithm)) }
 
         val action = { cryptoObject: CryptoObject ->
-          val signatureText = cipherBox.sign(cryptoObject.signature!!, data)
+          val signatureText = cipherBox.sign(cryptoObject.signature!!, data,signAlgorithm)
           onSuccess(signatureText)
         }
 
@@ -188,4 +188,6 @@ class SecureKeystoreImpl(
       e.printStackTrace()
     }
   }
+
+
 }

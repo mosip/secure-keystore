@@ -11,12 +11,15 @@ import javax.crypto.Cipher
 import javax.crypto.Mac
 import javax.crypto.SecretKey
 import javax.crypto.spec.GCMParameterSpec
+import org.bouncycastle.asn1.ASN1Integer
+import org.bouncycastle.asn1.ASN1Sequence
+import org.bouncycastle.asn1.ASN1InputStream
+import java.io.ByteArrayInputStream
 
 
 const val CIPHER_ALGORITHM =
   "${KeyProperties.KEY_ALGORITHM_AES}/${KeyProperties.BLOCK_MODE_GCM}/${KeyProperties.ENCRYPTION_PADDING_NONE}"
 const val GCM_TAG_LEN = 128
-val signAlgorithm = "SHA256withRSA"
 const val HMAC_ALGORITHM = "HmacSHA256"
 
 class CipherBoxImpl : CipherBox {
@@ -62,12 +65,17 @@ class CipherBoxImpl : CipherBox {
     return signature
   }
 
-  override fun sign(signature: Signature, data: String): String {
+  override fun sign(signature: Signature, data: String, signAlgorithm: String): String {
     try {
       val bytes = data.toByteArray(charset("UTF8"))
       val sign = signature.run {
         update(bytes)
         sign()
+      }
+      if(signAlgorithm.equals("SHA256withECDSA"))
+      {
+        val rsFormatSignature = convertDerToRsFormat(sign)
+        return Base64.encodeToString(rsFormatSignature, Base64.DEFAULT)
       }
       return Base64.encodeToString(sign, Base64.DEFAULT)
     } catch (e: Exception) {
@@ -75,6 +83,28 @@ class CipherBoxImpl : CipherBox {
       throw e
     }
   }
+
+  private fun convertDerToRsFormat(derSignature: ByteArray): ByteArray {
+    val asn1InputStream = ASN1InputStream(ByteArrayInputStream(derSignature))
+    val seq = asn1InputStream.readObject() as ASN1Sequence
+    val r = (seq.getObjectAt(0) as ASN1Integer).value
+    val s = (seq.getObjectAt(1) as ASN1Integer).value
+
+    val rBytes = r.toByteArray()
+    val sBytes = s.toByteArray()
+
+    val rPadded = ByteArray(32)
+    val sPadded = ByteArray(32)
+
+    val rTrimmed = if (rBytes.size > 32) rBytes.copyOfRange(rBytes.size - 32, rBytes.size) else rBytes
+    val sTrimmed = if (sBytes.size > 32) sBytes.copyOfRange(sBytes.size - 32, sBytes.size) else sBytes
+
+    System.arraycopy(rTrimmed, 0, rPadded, 32 - rTrimmed.size, rTrimmed.size)
+    System.arraycopy(sTrimmed, 0, sPadded, 32 - sTrimmed.size, sTrimmed.size)
+
+    return rPadded + sPadded
+  }
+
 
   override fun generateHmacSha(key: SecretKey, data: String): ByteArray {
     val mac = Mac.getInstance(HMAC_ALGORITHM)

@@ -91,6 +91,7 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
     val purposes = PURPOSE_ENCRYPT or PURPOSE_DECRYPT or PURPOSE_SIGN or PURPOSE_VERIFY
       return KeyGenParameterSpec.Builder(alias, purposes)
         .setDigests(DIGEST_SHA256,DIGEST_SHA512)
+        .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
   }
 
   private fun setUserAuth(
