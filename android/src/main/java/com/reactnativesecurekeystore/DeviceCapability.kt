@@ -15,7 +15,7 @@ import javax.crypto.SecretKeyFactory
 class DeviceCapability(
   private val secureKeystore: SecureKeystore,
   private val KeyGenerator: KeyGeneratorImpl,
-  private val biometrics: Biometrics
+  private val biometrics: Biometrics,
 ) {
   private val mutex = Object()
 

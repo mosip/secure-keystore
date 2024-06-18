@@ -33,9 +33,14 @@ class BiometricPromptAuthCallback(
       // If Auth is timeout and key is invalidated, we get user not Auth exception even after auth
       when (e) {
         is UserNotAuthenticatedException, is KeyPermanentlyInvalidatedException -> {
-          Log.e(logTag, "Exception in init after biometric auth, this happens if key is invalidated in timeout based auth", e)
+          Log.e(
+            logTag,
+            "Exception in init after biometric auth, this happens if key is invalidated in timeout based auth",
+            e
+          )
           continuation.resumeWithException(KeyInvalidatedException())
         }
+
         else -> {
           Log.e(logTag, "Exception in action after biometric auth", e)
           continuation.resumeWithException(RuntimeException("Action Failed after biometric auth success"))

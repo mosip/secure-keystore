@@ -23,7 +23,7 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 class Biometrics(
-  private val context: ReactApplicationContext
+  private val context: ReactApplicationContext,
 ) {
   private val logTag = Util.getLogTag(javaClass.simpleName)
 
@@ -40,7 +40,7 @@ class Biometrics(
   suspend fun authenticateAndPerform(
     createCryptoObject: () -> CryptoObject,
     action: (CryptoObject) -> Unit,
-    onFailure: (code: Int, message: String) -> Unit
+    onFailure: (code: Int, message: String) -> Unit,
   ) {
     try {
       Log.d(logTag, "Calling action for auth")
@@ -57,9 +57,11 @@ class Biometrics(
           Log.e(logTag, "Calling action failed due to auth exception", e)
           authenticate(createCryptoObject, action, true)
         }
+
         is KeyPermanentlyInvalidatedException -> {
           throw KeyInvalidatedException()
         }
+
         else -> throw e
       }
     } catch (e: Exception) {
@@ -76,7 +78,7 @@ class Biometrics(
   private suspend fun authenticate(
     createCryptoObject: () -> CryptoObject,
     action: (CryptoObject) -> Unit,
-    createCryptoObjectSuccess: Boolean
+    createCryptoObjectSuccess: Boolean,
   ) {
 
     return suspendCoroutine { continuation ->
@@ -91,7 +93,8 @@ class Biometrics(
           val executor: Executor = Executors.newSingleThreadExecutor()
 
           val promptInfo = createPromptInfo()
-          val biometricPrompt = BiometricPrompt(fragmentActivity as FragmentActivity, executor, authCallback)
+          val biometricPrompt =
+            BiometricPrompt(fragmentActivity as FragmentActivity, executor, authCallback)
 
           if (createCryptoObjectSuccess) {
             biometricPrompt.authenticate(promptInfo, createCryptoObject())

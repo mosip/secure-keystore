@@ -9,7 +9,8 @@ import com.reactnativesecurekeystore.biometrics.Biometrics
 import com.reactnativesecurekeystore.common.Util
 import kotlin.math.log
 
-class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext) {
+class SecureKeystoreModule(reactContext: ReactApplicationContext) :
+  ReactContextBaseJavaModule(reactContext) {
   private val keyGenerator = KeyGeneratorImpl()
   private val cipherBox = CipherBoxImpl()
   private val biometrics = Biometrics(reactContext)
@@ -93,10 +94,11 @@ class SecureKeystoreModule(reactContext: ReactApplicationContext) : ReactContext
   }
 
   @ReactMethod
-  fun sign(alias: String, data: String, promise: Promise) {
+  fun sign(signAlgoritm: String, alias: String, data: String, promise: Promise) {
     Log.d(logTag, "signing data")
 
     keystore.sign(
+      signAlgoritm,
       alias,
       data,
       onSuccess = { signature -> run { promise.resolve(signature) } },

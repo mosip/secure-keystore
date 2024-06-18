@@ -95,9 +95,15 @@ generates a symmetric key for encryption and decryption
 
 ### generateKeyPair
 
-`generateKey(alias: string) => string`
+`generateKeyPair(alias: String, isAuthRequired: Boolean, authTimeout: Int?): String`
 
 generates a asymmetric RSA key Pair for signing
+
+### generateKeyPairEC
+
+`generateKeyPairEC(alias: String, isAuthRequired: Boolean, authTimeout: Int?): String`
+
+generates a asymmetric EC(P-256) key Pair for signing.
 
 ### encryptData
 
@@ -113,10 +119,33 @@ Decrypts the given encryptionText using the key that is assigned to the alias. R
 
 ### sign
 
-`sign(alias: string, data: string) => string`
+`sign(signature: Signature, data: String, signAlgorithm: String): String`
 
-Create a signature for the given data using the key that is assigned to the alias. Returns back the signature as a string
+Create a signature for the given data, and signing algorithm using the key that is assigned to the alias. Returns back the signature as a string
+For `SHA256withECDSA` as `signAlgorithm` the output is in standard ASN1 format.In case of certain verifiers like jwt.io conversion to RS format is necessary.
 
+```kotlin
+ private fun convertDerToRsFormat(derSignature: ByteArray): ByteArray {
+     val asn1InputStream = ASN1InputStream(ByteArrayInputStream(derSignature))
+     val seq = asn1InputStream.readObject() as ASN1Sequence
+     val r = (seq.getObjectAt(0) as ASN1Integer).value
+     val s = (seq.getObjectAt(1) as ASN1Integer).value
+
+     val rBytes = r.toByteArray()
+     val sBytes = s.toByteArray()
+
+     val rPadded = ByteArray(32)
+     val sPadded = ByteArray(32)
+
+     val rTrimmed = if (rBytes.size > 32) rBytes.copyOfRange(rBytes.size - 32, rBytes.size) else rBytes
+     val sTrimmed = if (sBytes.size > 32) sBytes.copyOfRange(sBytes.size - 32, sBytes.size) else sBytes
+
+     System.arraycopy(rTrimmed, 0, rPadded, 32 - rTrimmed.size, rTrimmed.size)
+     System.arraycopy(sTrimmed, 0, sPadded, 32 - sTrimmed.size, sTrimmed.size)
+
+     return rPadded + sPadded
+   }
+```
 ### hasAlias
 
 `hasAlias(alias: string) => boolean`

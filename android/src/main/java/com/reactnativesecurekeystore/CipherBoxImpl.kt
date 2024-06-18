@@ -16,7 +16,6 @@ import javax.crypto.spec.GCMParameterSpec
 const val CIPHER_ALGORITHM =
   "${KeyProperties.KEY_ALGORITHM_AES}/${KeyProperties.BLOCK_MODE_GCM}/${KeyProperties.ENCRYPTION_PADDING_NONE}"
 const val GCM_TAG_LEN = 128
-const val SIGN_ALGORITHM = "SHA256with${KeyProperties.KEY_ALGORITHM_RSA}"
 const val HMAC_ALGORITHM = "HmacSHA256"
 
 class CipherBoxImpl : CipherBox {
@@ -48,13 +47,13 @@ class CipherBoxImpl : CipherBox {
     try {
       return cipher.doFinal(encryptedOutput.encryptedData, 0, encryptedOutput.encryptedData.size)
     } catch (e: Exception) {
-      Log.e("Secure","Exception in Decryption",e)
+      Log.e("Secure", "Exception in Decryption", e)
       throw e
     }
   }
 
-  override fun createSignature(key: PrivateKey): Signature {
-    val signature = Signature.getInstance(SIGN_ALGORITHM).run {
+  override fun createSignature(key: PrivateKey, signAlgorithm: String): Signature {
+    val signature = Signature.getInstance(signAlgorithm).run {
       initSign(key)
       this
     }
@@ -62,7 +61,7 @@ class CipherBoxImpl : CipherBox {
     return signature
   }
 
-  override fun sign(signature: Signature, data: String): String {
+  override fun sign(signature: Signature, data: String, signAlgorithm: String): String {
     try {
       val bytes = data.toByteArray(charset("UTF8"))
       val sign = signature.run {
@@ -75,6 +74,7 @@ class CipherBoxImpl : CipherBox {
       throw e
     }
   }
+
 
   override fun generateHmacSha(key: SecretKey, data: String): ByteArray {
     val mac = Mac.getInstance(HMAC_ALGORITHM)

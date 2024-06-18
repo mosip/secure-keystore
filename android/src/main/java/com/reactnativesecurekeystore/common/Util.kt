@@ -10,7 +10,7 @@ import javax.crypto.SecretKeyFactory
 class Util {
   companion object {
     fun getKeyInfo(key: Key): KeyInfo {
-      if(key is SecretKey) {
+      if (key is SecretKey) {
         val keyFactory = SecretKeyFactory.getInstance(key.algorithm, KEYSTORE_TYPE)
         return keyFactory.getKeySpec(key, KeyInfo::class.java) as KeyInfo
       }

@@ -8,7 +8,7 @@ import java.security.PublicKey
 
 class PemConverter(private val publicKey: PublicKey) {
   fun toPem(): String {
-    return dataToPem("${publicKey.algorithm} ${KeyType.PUBLIC.text}", publicKeyToPkcs1(publicKey))
+    return dataToPem("${KeyType.PUBLIC.text}", publicKeyToPkcs8(publicKey))
   }
 
   private fun dataToPem(header: String, data: ByteArray): String {
@@ -21,10 +21,8 @@ class PemConverter(private val publicKey: PublicKey) {
     return stringWriter.toString()
   }
 
-  private fun publicKeyToPkcs1(publicKey: PublicKey): ByteArray {
-    val spkInfo = SubjectPublicKeyInfo.getInstance(publicKey.encoded)
-    val primitive = spkInfo.parsePublicKey()
-    return primitive.encoded
+  private fun publicKeyToPkcs8(publicKey: PublicKey): ByteArray {
+    return publicKey.encoded
   }
 
   private enum class KeyType(val text: String) {
