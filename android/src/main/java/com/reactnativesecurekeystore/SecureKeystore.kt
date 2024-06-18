@@ -11,29 +11,30 @@ interface SecureKeystore {
     alias: String,
     data: String,
     onSuccess: (encryptedText: String) -> Unit,
-    onFailure: (code: Int, message: String) -> Unit
+    onFailure: (code: Int, message: String) -> Unit,
   )
 
   fun decryptData(
     alias: String, encryptedText: String,
     onSuccess: (data: String) -> Unit,
-    onFailure: (code: Int, message: String) -> Unit
+    onFailure: (code: Int, message: String) -> Unit,
   )
 
   fun sign(
-    signAlgorithm:String,
+    signAlgorithm: String,
     alias: String,
     data: String,
     onSuccess: (signature: String) -> Unit,
-    onFailure: (code: Int, message: String) -> Unit
+    onFailure: (code: Int, message: String) -> Unit,
   )
 
   fun generateHmacSha(
     alias: String, data: String,
     onSuccess: (signature: String) -> Unit,
-    onFailure: (code: Int, message: String) -> Unit
+    onFailure: (code: Int, message: String) -> Unit,
   )
-   fun generateHmacSha256Key(alias: String)
 
-   fun removeAllKeys()
+  fun generateHmacSha256Key(alias: String)
+
+  fun removeAllKeys()
 }

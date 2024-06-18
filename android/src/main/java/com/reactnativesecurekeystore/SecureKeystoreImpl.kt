@@ -15,7 +15,9 @@ import java.security.PrivateKey
 import javax.crypto.SecretKey
 
 class SecureKeystoreImpl(
-  private val keyGenerator: KeyGenerator, private val cipherBox: CipherBox, private val biometrics: Biometrics
+  private val keyGenerator: KeyGenerator,
+  private val cipherBox: CipherBox,
+  private val biometrics: Biometrics,
 ) : SecureKeystore {
   private var ks: KeyStore = KeyStore.getInstance(KEYSTORE_TYPE)
   private val logTag = getLogTag(javaClass.simpleName)
@@ -28,13 +30,17 @@ class SecureKeystoreImpl(
 
   /** Generate a new key pair */
   override fun generateKeyPair(alias: String, isAuthRequired: Boolean, authTimeout: Int?): String {
-      val keyPair = keyGenerator.generateKeyPair(alias, isAuthRequired, authTimeout)
-      return PemConverter(keyPair.public).toPem()
+    val keyPair = keyGenerator.generateKeyPair(alias, isAuthRequired, authTimeout)
+    return PemConverter(keyPair.public).toPem()
   }
 
-  override fun generateKeyPairEC(alias: String, isAuthRequired: Boolean, authTimeout: Int?): String {
+  override fun generateKeyPairEC(
+    alias: String,
+    isAuthRequired: Boolean,
+    authTimeout: Int?,
+  ): String {
     val keyPair = keyGenerator.generateKeyPairEC(alias, isAuthRequired, authTimeout)
-    Log.d("keytest",PemConverter(keyPair.public).toPem())
+    Log.d("keytest", PemConverter(keyPair.public).toPem())
     return PemConverter(keyPair.public).toPem()
   }
 
@@ -64,7 +70,7 @@ class SecureKeystoreImpl(
     alias: String,
     data: String,
     onSuccess: (encryptedText: String) -> Unit,
-    onFailure: (code: Int, message: String) -> Unit
+    onFailure: (code: Int, message: String) -> Unit,
   ) {
     try {
       val key = getKeyOrThrow(alias)
@@ -79,7 +85,7 @@ class SecureKeystoreImpl(
           onSuccess(encryptedText)
         }
 
-        biometrics.authenticateAndPerform(createCryptoObject, action, onFailure)
+        biometrics?.authenticateAndPerform(createCryptoObject, action, onFailure)
       }
     } catch (ex: Exception) {
       onFailure(ex.hashCode(), ex.message.toString())
@@ -89,7 +95,7 @@ class SecureKeystoreImpl(
   override fun decryptData(
     alias: String, encryptedText: String,
     onSuccess: (data: String) -> Unit,
-    onFailure: (code: Int, message: String) -> Unit
+    onFailure: (code: Int, message: String) -> Unit,
   ) {
     try {
       val key = getKeyOrThrow(alias)
@@ -108,7 +114,7 @@ class SecureKeystoreImpl(
           onSuccess(String(data))
         }
 
-        biometrics.authenticateAndPerform(
+        biometrics?.authenticateAndPerform(
           createCryptoObject,
           action,
           onFailure
@@ -120,22 +126,22 @@ class SecureKeystoreImpl(
   }
 
   override fun sign(
-    signAlgorithm:String,
+    signAlgorithm: String,
     alias: String, data: String,
-    onSuccess: (signature: String) -> Unit, onFailure: (code: Int, message: String) -> Unit
+    onSuccess: (signature: String) -> Unit, onFailure: (code: Int, message: String) -> Unit,
   ) {
     try {
       val key = getKeyOrThrow(alias) as PrivateKey
 
       runBlocking {
-        val createCryptoObject = { CryptoObject(cipherBox.createSignature(key,signAlgorithm)) }
+        val createCryptoObject = { CryptoObject(cipherBox.createSignature(key, signAlgorithm)) }
 
         val action = { cryptoObject: CryptoObject ->
-          val signatureText = cipherBox.sign(cryptoObject.signature!!, data,signAlgorithm)
+          val signatureText = cipherBox.sign(cryptoObject.signature!!, data, signAlgorithm)
           onSuccess(signatureText)
         }
 
-        biometrics.authenticateAndPerform(
+        biometrics?.authenticateAndPerform(
           createCryptoObject,
           action,
           onFailure
@@ -151,7 +157,7 @@ class SecureKeystoreImpl(
   override fun generateHmacSha(
     alias: String, data: String,
     onSuccess: (sha: String) -> Unit,
-    onFailure: (code: Int, message: String) -> Unit
+    onFailure: (code: Int, message: String) -> Unit,
   ) {
     try {
       val key = getKeyOrThrow(alias) as SecretKey

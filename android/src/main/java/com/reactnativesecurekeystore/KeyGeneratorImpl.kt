@@ -47,14 +47,18 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
     return keyPairGenerator.generateKeyPair()
   }
 
-    override fun generateKeyPairEC(alias: String, isAuthRequired: Boolean, authTimeout: Int?): KeyPair {
+  override fun generateKeyPairEC(
+    alias: String,
+    isAuthRequired: Boolean,
+    authTimeout: Int?,
+  ): KeyPair {
     val keySpecBuilder = getKeyPairGenSpecBuilderEC(alias)
 
     if (isAuthRequired) {
       setUserAuth(keySpecBuilder, authTimeout)
     }
 
-      keyPairGeneratorEC.initialize(keySpecBuilder.build())
+    keyPairGeneratorEC.initialize(keySpecBuilder.build())
 
     return keyPairGeneratorEC.generateKeyPair()
   }
@@ -89,13 +93,13 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
 
   private fun getKeyPairGenSpecBuilderEC(alias: String): KeyGenParameterSpec.Builder {
     val purposes = PURPOSE_ENCRYPT or PURPOSE_DECRYPT or PURPOSE_SIGN or PURPOSE_VERIFY
-      return KeyGenParameterSpec.Builder(alias, purposes)
-        .setDigests(DIGEST_SHA256,DIGEST_SHA512)
-        .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
+    return KeyGenParameterSpec.Builder(alias, purposes)
+      .setDigests(DIGEST_SHA256, DIGEST_SHA512)
+      .setAlgorithmParameterSpec(ECGenParameterSpec("secp256r1"))
   }
 
   private fun setUserAuth(
-    builder: KeyGenParameterSpec.Builder, authTimeout: Int?
+    builder: KeyGenParameterSpec.Builder, authTimeout: Int?,
   ) {
     builder.setUserAuthenticationRequired(true)
 
@@ -106,11 +110,11 @@ class KeyGeneratorImpl : com.reactnativesecurekeystore.KeyGenerator {
 
   private fun setAuthTimeout(builder: KeyGenParameterSpec.Builder, authTimeout: Int) {
     if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
-      if(authTimeout != 0) {
+      if (authTimeout != 0) {
         builder.setUserAuthenticationParameters(authTimeout, AUTH_BIOMETRIC_STRONG)
       }
     } else {
-      val timeout = if(authTimeout == 0) -1 else authTimeout
+      val timeout = if (authTimeout == 0) -1 else authTimeout
       builder.setUserAuthenticationValidityDurationSeconds(timeout)
     }
   }

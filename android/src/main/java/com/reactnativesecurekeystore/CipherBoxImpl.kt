@@ -51,12 +51,12 @@ class CipherBoxImpl : CipherBox {
     try {
       return cipher.doFinal(encryptedOutput.encryptedData, 0, encryptedOutput.encryptedData.size)
     } catch (e: Exception) {
-      Log.e("Secure","Exception in Decryption",e)
+      Log.e("Secure", "Exception in Decryption", e)
       throw e
     }
   }
 
-  override fun createSignature(key: PrivateKey,signAlgorithm: String): Signature {
+  override fun createSignature(key: PrivateKey, signAlgorithm: String): Signature {
     val signature = Signature.getInstance(signAlgorithm).run {
       initSign(key)
       this
@@ -72,37 +72,11 @@ class CipherBoxImpl : CipherBox {
         update(bytes)
         sign()
       }
-      if(signAlgorithm.equals("SHA256withECDSA"))
-      {
-        val rsFormatSignature = convertDerToRsFormat(sign)
-        return Base64.encodeToString(rsFormatSignature, Base64.DEFAULT)
-      }
       return Base64.encodeToString(sign, Base64.DEFAULT)
     } catch (e: Exception) {
       Log.e("CipherBox", "Exception in sign creation", e)
       throw e
     }
-  }
-
-  private fun convertDerToRsFormat(derSignature: ByteArray): ByteArray {
-    val asn1InputStream = ASN1InputStream(ByteArrayInputStream(derSignature))
-    val seq = asn1InputStream.readObject() as ASN1Sequence
-    val r = (seq.getObjectAt(0) as ASN1Integer).value
-    val s = (seq.getObjectAt(1) as ASN1Integer).value
-
-    val rBytes = r.toByteArray()
-    val sBytes = s.toByteArray()
-
-    val rPadded = ByteArray(32)
-    val sPadded = ByteArray(32)
-
-    val rTrimmed = if (rBytes.size > 32) rBytes.copyOfRange(rBytes.size - 32, rBytes.size) else rBytes
-    val sTrimmed = if (sBytes.size > 32) sBytes.copyOfRange(sBytes.size - 32, sBytes.size) else sBytes
-
-    System.arraycopy(rTrimmed, 0, rPadded, 32 - rTrimmed.size, rTrimmed.size)
-    System.arraycopy(sTrimmed, 0, sPadded, 32 - sTrimmed.size, sTrimmed.size)
-
-    return rPadded + sPadded
   }
 
 
