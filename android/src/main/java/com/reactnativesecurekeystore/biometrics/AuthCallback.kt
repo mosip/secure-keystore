@@ -1,3 +1,5 @@
+package com.reactnativesecurekeystore.biometrics
+
 import android.security.keystore.KeyPermanentlyInvalidatedException
 import android.security.keystore.UserNotAuthenticatedException
 import android.util.Log
@@ -8,7 +10,6 @@ import com.reactnativesecurekeystore.exception.KeyInvalidatedException
 import kotlin.coroutines.Continuation
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
-import kotlin.math.acos
 
 class BiometricPromptAuthCallback(
   private val continuation: Continuation<Unit>,
@@ -18,7 +19,6 @@ class BiometricPromptAuthCallback(
 
   override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
     super.onAuthenticationError(errorCode, errString)
-
     continuation.resumeWithException(RuntimeException("User has cancelled biometric auth code: $errorCode, message: $errString"))
   }
 
@@ -33,20 +33,14 @@ class BiometricPromptAuthCallback(
       // If Auth is timeout and key is invalidated, we get user not Auth exception even after auth
       when (e) {
         is UserNotAuthenticatedException, is KeyPermanentlyInvalidatedException -> {
-          Log.e(
-            logTag,
-            "Exception in init after biometric auth, this happens if key is invalidated in timeout based auth",
-            e
-          )
+          Log.e(logTag, "Exception in init after biometric auth, this happens if key is invalidated in timeout based auth", e)
           continuation.resumeWithException(KeyInvalidatedException())
         }
-
         else -> {
           Log.e(logTag, "Exception in action after biometric auth", e)
           continuation.resumeWithException(RuntimeException("Action Failed after biometric auth success"))
         }
       }
-
     }
   }
 }

@@ -17,13 +17,16 @@ import javax.crypto.SecretKey
 class SecureKeystoreImpl(
   private val keyGenerator: KeyGenerator,
   private val cipherBox: CipherBox,
-  private val biometrics: Biometrics,
+  private val biometrics: Biometrics
 ) : SecureKeystore {
   private var ks: KeyStore = KeyStore.getInstance(KEYSTORE_TYPE)
   private val logTag = getLogTag(javaClass.simpleName)
 
+  init {
+    ks.load(null)
+  }
 
-  /**  Generate secret key and store it in AndroidKeystore */
+  /** Generate secret key and store it in AndroidKeystore */
   override fun generateKey(alias: String, isAuthRequired: Boolean, authTimeout: Int?) {
     keyGenerator.generateKey(alias, isAuthRequired, authTimeout)
   }
@@ -37,7 +40,7 @@ class SecureKeystoreImpl(
   override fun generateKeyPairEC(
     alias: String,
     isAuthRequired: Boolean,
-    authTimeout: Int?,
+    authTimeout: Int?
   ): String {
     val keyPair = keyGenerator.generateKeyPairEC(alias, isAuthRequired, authTimeout)
     Log.d("keytest", PemConverter(keyPair.public).toPem())
@@ -59,18 +62,14 @@ class SecureKeystoreImpl(
 
   override fun hasAlias(alias: String): Boolean {
     ks.load(null)
-
-    if (ks.containsAlias(alias)) {
-      return true
-    }
-    return false
+    return ks.containsAlias(alias)
   }
 
   override fun encryptData(
     alias: String,
     data: String,
     onSuccess: (encryptedText: String) -> Unit,
-    onFailure: (code: Int, message: String) -> Unit,
+    onFailure: (code: Int, message: String) -> Unit
   ) {
     try {
       val key = getKeyOrThrow(alias)
@@ -85,7 +84,7 @@ class SecureKeystoreImpl(
           onSuccess(encryptedText)
         }
 
-        biometrics?.authenticateAndPerform(createCryptoObject, action, onFailure)
+        biometrics.authenticateAndPerform(createCryptoObject, action, onFailure)
       }
     } catch (ex: Exception) {
       onFailure(ex.hashCode(), ex.message.toString())
@@ -95,7 +94,7 @@ class SecureKeystoreImpl(
   override fun decryptData(
     alias: String, encryptedText: String,
     onSuccess: (data: String) -> Unit,
-    onFailure: (code: Int, message: String) -> Unit,
+    onFailure: (code: Int, message: String) -> Unit
   ) {
     try {
       val key = getKeyOrThrow(alias)
@@ -114,11 +113,7 @@ class SecureKeystoreImpl(
           onSuccess(String(data))
         }
 
-        biometrics?.authenticateAndPerform(
-          createCryptoObject,
-          action,
-          onFailure
-        )
+        biometrics.authenticateAndPerform(createCryptoObject, action, onFailure)
       }
     } catch (ex: Exception) {
       onFailure(ex.hashCode(), ex.message.toString())
@@ -128,7 +123,7 @@ class SecureKeystoreImpl(
   override fun sign(
     signAlgorithm: String,
     alias: String, data: String,
-    onSuccess: (signature: String) -> Unit, onFailure: (code: Int, message: String) -> Unit,
+    onSuccess: (signature: String) -> Unit, onFailure: (code: Int, message: String) -> Unit
   ) {
     try {
       val key = getKeyOrThrow(alias) as PrivateKey
@@ -140,7 +135,6 @@ class SecureKeystoreImpl(
           val signatureText = cipherBox.sign(cryptoObject.signature!!, data, signAlgorithm)
           onSuccess(signatureText)
         }
-
         biometrics?.authenticateAndPerform(
           createCryptoObject,
           action,
@@ -149,7 +143,6 @@ class SecureKeystoreImpl(
       }
     } catch (e: RuntimeException) {
       Log.e(logTag, "Exception in sign creation: ", e)
-
       onFailure(e.hashCode(), e.message.toString())
     }
   }
@@ -157,34 +150,29 @@ class SecureKeystoreImpl(
   override fun generateHmacSha(
     alias: String, data: String,
     onSuccess: (sha: String) -> Unit,
-    onFailure: (code: Int, message: String) -> Unit,
+    onFailure: (code: Int, message: String) -> Unit
   ) {
     try {
       val key = getKeyOrThrow(alias) as SecretKey
       val hmacSha: ByteArray = cipherBox.generateHmacSha(key, data)
-
       onSuccess(String(hmacSha))
     } catch (e: RuntimeException) {
       Log.e(logTag, "Exception in Hmac generation: ", e)
-
       onFailure(e.hashCode(), e.message.toString())
     }
   }
 
-  private fun getKeyOrThrow(alias: String): Key {
+  public fun getKeyOrThrow(alias: String): Key {
     ks.load(null)
-
     if (!ks.containsAlias(alias)) {
       throw KeyNotFound("Key not found for the alias: $alias")
     }
-
     return ks.getKey(alias, null)
   }
 
   override fun removeAllKeys() {
     try {
       ks.load(null)
-
       val aliases = ks.aliases()
       while (aliases.hasMoreElements()) {
         val alias = aliases.nextElement()
@@ -194,6 +182,4 @@ class SecureKeystoreImpl(
       e.printStackTrace()
     }
   }
-
-
 }
