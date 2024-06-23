@@ -22,7 +22,6 @@ import kotlin.coroutines.resumeWithException
 import kotlin.coroutines.suspendCoroutine
 
 class Biometrics(
-//    private val context: Context,
 ) {
     private val logTag = Util.getLogTag(javaClass.simpleName)
 
@@ -40,7 +39,7 @@ class Biometrics(
         createCryptoObject: () -> CryptoObject,
         action: (CryptoObject) -> Unit,
         onFailure: (code: Int, message: String) -> Unit,
-        context:Context
+        context: Context,
     ) {
         try {
             val preAuthCryptoObject = createCryptoObject()
@@ -48,13 +47,13 @@ class Biometrics(
         } catch (e: UserNotAuthenticatedException) {
             // If key has timeout based biometric auth requirement, Cipher.Init fails and caught here
             Log.e(logTag, "Calling action failed due to auth exception with user not auth", e)
-            authenticate(createCryptoObject, action, false,context)
+            authenticate(createCryptoObject, action, false, context)
         } catch (e: Exception) {
             // If key has every use biometric auth requirement, Cipher.doFinal fails and caught here
             when (e) {
                 is IllegalBlockSizeException, is SignatureException -> {
                     Log.e(logTag, "Calling action failed due to auth exception", e)
-                    authenticate(createCryptoObject, action, true,context)
+                    authenticate(createCryptoObject, action, true, context)
                 }
 
                 is KeyPermanentlyInvalidatedException -> {
@@ -70,7 +69,7 @@ class Biometrics(
     }
 
     fun isBiometricEnabled(
-        context:Context
+        context: Context,
     ): Boolean {
         val biometricManager = BiometricManager.from(context)
         return biometricManager.canAuthenticate(BiometricManager.Authenticators.BIOMETRIC_STRONG) == BiometricManager.BIOMETRIC_SUCCESS
@@ -80,7 +79,7 @@ class Biometrics(
         createCryptoObject: () -> CryptoObject,
         action: (CryptoObject) -> Unit,
         createCryptoObjectSuccess: Boolean,
-        context:Context
+        context: Context,
     ) {
         return suspendCoroutine { continuation ->
             val fragmentActivity = context as? FragmentActivity
