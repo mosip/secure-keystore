@@ -3,7 +3,7 @@ const LINKING_ERROR = `The package 'react-native-secure-keystore' doesn't seem t
   ios: "- You have run 'pod install'\n",
   default: ''
 }) + '- You rebuilt the app after installing the package\n' + '- You are not using Expo Go\n';
-const RNSecureKeystore = NativeModules.RNSecureKeystoreModule ? NativeModules.SecureKeystore : new Proxy({}, {
+const SecureKeystore = NativeModules.SecureKeystoreModule ? NativeModules.SecureKeystoreModule : new Proxy({}, {
   get() {
     throw new Error(LINKING_ERROR);
   }

@@ -1,6 +1,7 @@
 package com.example.securekeystoreapp
 
 import android.app.ProgressDialog
+import android.content.Context
 import android.os.Bundle
 import android.util.Log
 import android.widget.Button
@@ -11,8 +12,9 @@ import com.reactnativesecurekeystore.CipherBoxImpl
 import com.reactnativesecurekeystore.KeyGeneratorImpl
 import com.reactnativesecurekeystore.SecureKeystoreImpl
 import com.reactnativesecurekeystore.biometrics.Biometrics
-import kotlinx.coroutines.*
-import android.content.Context
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 class MainActivity : AppCompatActivity() {
 
@@ -46,14 +48,14 @@ class MainActivity : AppCompatActivity() {
 
         // Set onClickListeners for buttons
         generateKeyPairButton.setOnClickListener {
-             alias = "myKeyAlias"
+            alias = "myKeyAlias"
             secureKeystore.generateKeyPair(alias, false, null)
             signALgorithm = "SHA256withRSA"
             resultTextView.text = "Generated Key Pair for alias: $alias"
         }
 
         generateECKeyPairButton.setOnClickListener {
-             alias = "myECKeyAlias"
+            alias = "myECKeyAlias"
             secureKeystore.generateKeyPairEC(alias, true, 10)
             resultTextView.text = "Generated EC Key Pair for alias: $alias"
             signALgorithm = "SHA256withECDSA"
@@ -61,11 +63,16 @@ class MainActivity : AppCompatActivity() {
 
         signDataButton.setOnClickListener {
             val data = dataToSignEditText.text.toString()
-            authenticateAndSignData(alias, data, resultTextView,this)
+            authenticateAndSignData(alias, data, resultTextView, this)
         }
     }
 
-    private fun authenticateAndSignData(alias: String, data: String, resultTextView: TextView,context:Context) {
+    private fun authenticateAndSignData(
+        alias: String,
+        data: String,
+        resultTextView: TextView,
+        context: Context,
+    ) {
         progressDialog.show()
         CoroutineScope(Dispatchers.IO).launch {
             try {
