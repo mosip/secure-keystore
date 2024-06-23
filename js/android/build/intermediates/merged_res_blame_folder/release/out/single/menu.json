@@ -1,0 +1,10 @@
+[
+    {
+        "merged": "/Users/abhishekpaul/secure-keystore/js/android/build/intermediates/res/merged/release/menu/example_menu.xml",
+        "source": "/Users/abhishekpaul/.gradle/caches/transforms-3/b80ac7c3ce65eddd98959669226058b2/transformed/core-1.7.0/res/menu/example_menu.xml"
+    },
+    {
+        "merged": "/Users/abhishekpaul/secure-keystore/js/android/build/intermediates/res/merged/release/menu/example_menu2.xml",
+        "source": "/Users/abhishekpaul/.gradle/caches/transforms-3/b80ac7c3ce65eddd98959669226058b2/transformed/core-1.7.0/res/menu/example_menu2.xml"
+    }
+]
