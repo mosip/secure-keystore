@@ -12,6 +12,7 @@ import com.reactnativesecurekeystore.KeyGeneratorImpl
 import com.reactnativesecurekeystore.SecureKeystoreImpl
 import com.reactnativesecurekeystore.biometrics.Biometrics
 import kotlinx.coroutines.*
+import android.content.Context
 
 class MainActivity : AppCompatActivity() {
 
@@ -28,7 +29,7 @@ class MainActivity : AppCompatActivity() {
         // Initialize the key generator, cipher box, and biometrics
         val keyGenerator = KeyGeneratorImpl()
         val cipherBox = CipherBoxImpl()
-        biometrics = Biometrics(this)
+        biometrics = Biometrics()
         secureKeystore = SecureKeystoreImpl(keyGenerator, cipherBox, biometrics)
 
         // Initialize the ProgressDialog
@@ -60,11 +61,11 @@ class MainActivity : AppCompatActivity() {
 
         signDataButton.setOnClickListener {
             val data = dataToSignEditText.text.toString()
-            authenticateAndSignData(alias, data, resultTextView)
+            authenticateAndSignData(alias, data, resultTextView,this)
         }
     }
 
-    private fun authenticateAndSignData(alias: String, data: String, resultTextView: TextView) {
+    private fun authenticateAndSignData(alias: String, data: String, resultTextView: TextView,context:Context) {
         progressDialog.show()
         CoroutineScope(Dispatchers.IO).launch {
             try {
@@ -81,7 +82,8 @@ class MainActivity : AppCompatActivity() {
                         runOnUiThread {
                             handleFailure(code, message)
                         }
-                    }
+                    },
+                    context
                 )
             } catch (e: Exception) {
                 Log.d("error", "error")
