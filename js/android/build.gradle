@@ -9,7 +9,6 @@ buildscript {
 
   repositories {
       google()
-      mavenLocal()
       mavenCentral()
   }
 
@@ -62,7 +61,6 @@ android {
 }
 
 repositories {
-  mavenLocal()
   mavenCentral()
   google()
 
@@ -151,3 +149,6 @@ if (isNewArchitectureEnabled()) {
 }
 
 apply from: "publish-artifact.gradle"
+allprojects { repositories { 
+    maven{url("https://oss.sonatype.org/content/repositories/snapshots/")}
+     } }
