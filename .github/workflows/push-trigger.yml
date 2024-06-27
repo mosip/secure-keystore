@@ -20,18 +20,9 @@ on:
       - develop*
       - MOSIP*
 jobs:
-  build-secure-keystore:
-    uses: mosip/kattu/.github/workflows/npm-android-build.yml@master
-    with:
-      SERVICE_LOCATION: '.'
-      ANDROID_LOCATION: 'android'
-      BUILD_ARTIFACT: secure-keystore
-    secrets:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK }}
-
   publish-secure-keystore-to-npm-registry:
     if: "${{ !contains(github.ref, 'master') && github.event_name != 'pull_request' &&  github.event_name == 'workflow_dispatch' }}"
-    needs: build-secure-keystore
+    # needs: build-secure-keystore
     uses: mosip/kattu/.github/workflows/npm-publish-to-npm-registry.yml@master
     with:
       SERVICE_LOCATION: '.'
