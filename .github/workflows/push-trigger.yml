@@ -21,7 +21,7 @@ on:
       - MOSIP*
 jobs:
   build-secure-keystore:
-    runs-on: ubuntu-lastest
+    runs-on: ubuntu-latest
     steps:
       - name: Dummy Step
         run: echo "This is a dummy job."
