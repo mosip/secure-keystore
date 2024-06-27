@@ -17,40 +17,18 @@ on:
       - release*
       - master
       - 1.*
-      - develop*
+      #- develop*
       - MOSIP*
 jobs:
-  build-secure-keystore:
-    uses: mosip/kattu/.github/workflows/npm-android-build.yml@master
-    with:
-      SERVICE_LOCATION: '.'
-      ANDROID_LOCATION: 'android'
-      BUILD_ARTIFACT: secure-keystore
-    secrets:
-      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_INJI_TEAM }}
 
   publish-secure-keystore-to-npm-registry:
     if: "${{ !contains(github.ref, 'master') && github.event_name != 'pull_request' &&  github.event_name == 'workflow_dispatch' }}"
-    needs: build-secure-keystore
     uses: mosip/kattu/.github/workflows/npm-publish-to-npm-registry.yml@master
     with:
-      SERVICE_LOCATION: '.'
+      SERVICE_LOCATION: 'js'
       ANDROID_LOCATION: 'android'
     secrets:
       NPM_AUTH_TOKEN: ${{ secrets.NPM_AUTH_TOKEN }}
       SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_INJI_TEAM }}
 
-  # sonar-analysis-secure-keystore:
-  #   if: "${{ github.event_name != 'pull_request' }}"
-  #   needs: build-secure-keystore
-  #   uses: mosip/kattu/.github/workflows/gradlew-sonar-analysis.yml@master
-  #   with:
-  #     SERVICE_LOCATION: '.'
-  #     ANDROID_LOCATION: 'android'
-  #     SONAR_URL: 'https://sonarcloud.io'
-  #     PROJECT_KEY: "mosip_${{ github.event.repository.name }}"
-  #     PROJECT_NAME: "${{ github.event.repository.name }}"
-  #   secrets:
-  #     SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-  #     SONAR_ORGANIZATION: ${{ secrets.ORG_KEY }}
-  #     SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_INJI_TEAM }}
+
