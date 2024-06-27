@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:padding="16dp">
+
+    <Button
+        android:id="@+id/generateKeyPairButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Generate Key Pair" />
+
+    <Button
+        android:id="@+id/generateECKeyPairButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Generate EC Key Pair" />
+
+    <EditText
+        android:id="@+id/dataToSignEditText"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:hint="Enter data to sign" />
+
+    <Button
+        android:id="@+id/signDataButton"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Sign Data" />
+
+    <TextView
+        android:id="@+id/resultTextView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Result"
+        android:paddingTop="16dp" />
+</LinearLayout>
+
