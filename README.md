@@ -42,16 +42,16 @@ import SecureKeyStore  from "@mosip/secure-keystore";
 
 // ...
 
-if(!SecureKeyStore.deviceSupportsHardware) {
+if(!SecureKeyStore.deviceSupportsHardware()) {
   return
 }
 
 const alias = "1234ab";
 const data = "any data";
 
-const publicKey = await SecureKeyStore.generateKeyPair(alias);
+const publicKey = await SecureKeyStore.generateKeyPair(alias,true,0);
 
-const signature = await SecureKeyStore.sign(alias, data)
+const signature = await SecureKeyStore.sign("SHA256withRSA",alias, data)
 
 ```
 
@@ -63,14 +63,14 @@ import SecureKeyStore  from "@mosip/secure-keystore";
 
 // ...
 
-if(!SecureKeyStore.deviceSupportsHardware) {
+if(!SecureKeyStore.deviceSupportsHardware()) {
   return
 }
 
 const alias = "1234ab";
 const base64EncodedData = encodeToBase64("any data");
 
-await SecureKeyStore.generateKey(alias);
+await SecureKeyStore.generateKey(alias,true,0);
 
 const encryptedData = await SecureKeyStore.encryptData(alias, base64EncodedData)
 const decryptedData = await SecureKeyStore.decryptData(alias, encryptedData)
@@ -89,7 +89,7 @@ Check if the device supports hardware key store
 
 ### generateKey
 
-`generateKey(alias: string) => void`
+`generateKey(alias: String, isAuthRequired: Boolean, authTimeout: Int?) => void`
 
 generates a symmetric key for encryption and decryption
 
@@ -155,7 +155,7 @@ Check if the given alias is present in the key store
 
 ## Contributing
 
-See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the repository and the development workflow.
+See the [contributing guide](../CONTRIBUTING.md) to learn how to contribute to the repository and the development workflow.
 
 ## License
 
