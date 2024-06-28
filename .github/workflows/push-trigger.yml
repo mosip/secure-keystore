@@ -23,7 +23,7 @@ jobs:
   build-secure-keystore:
     uses: mosip/kattu/.github/workflows/npm-android-build.yml@master
     with:
-      SERVICE_LOCATION: '.'
+      SERVICE_LOCATION: 'js'
       ANDROID_LOCATION: 'android'
       BUILD_ARTIFACT: secure-keystore
     secrets:
