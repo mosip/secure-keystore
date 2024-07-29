@@ -7999,11 +7999,6 @@
   dependencies:
     "find-up" "^4.0.0"
 
-"pod-install@^0.1.0":
-  "integrity" "sha512-NeDWGigjJRriOIKBOvpW2/tK2tYLfyUT7ia6C6L+oarCAhBNP+IGODWdU+GEAqvfsseqOApcFclpXAJTL0UPzA=="
-  "resolved" "https://registry.npmjs.org/pod-install/-/pod-install-0.1.38.tgz"
-  "version" "0.1.38"
-
 "posix-character-classes@^0.1.0":
   "integrity" "sha512-xTgYBc3fuo7Yt7JbiuFxSYGToMoz8fLoE6TC9Wx1P/u+LfeThMOAqmuyECnlBaaJb+u1m9hHiXUEtwW4OzfUJg=="
   "resolved" "https://registry.npmjs.org/posix-character-classes/-/posix-character-classes-0.1.1.tgz"
