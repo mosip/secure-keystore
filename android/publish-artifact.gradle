@@ -86,6 +86,11 @@ publishing {
           def gpgArgumentsNode = gpgConfigurationNode.appendNode('gpgArguments')
           gpgArgumentsNode.appendNode('arg', '--pinentry-mode')
           gpgArgumentsNode.appendNode('arg', 'loopback')
+
+          def profilesNode = asNode().appendNode('profiles').appendNode('profile')
+          def activationNode = profilesNode.appendNode('activation')
+          activationNode.appendNode('activeByDefault', 'false');
+
         }
       }
       groupId = "io.mosip"
