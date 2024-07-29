@@ -134,7 +134,7 @@ def kotlin_version = getExtOrDefault('kotlinVersion')
 
 dependencies {
     //noinspection GradleDynamicVersion
-  implementation "com.facebook.react:react-native:+"
+  implementation "com.facebook.react:react-native:0.70.6"
   implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
   implementation 'com.madgag.spongycastle:core:1.56.0.0'
   implementation 'com.madgag.spongycastle:prov:1.56.0.0'
