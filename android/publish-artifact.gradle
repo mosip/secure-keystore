@@ -11,6 +11,9 @@ publishing {
   }
   publications {
     aar(MavenPublication) {
+      afterEvaluate {
+        from components.findByName('release')
+      }
       pom {
         withXml {
           asNode().appendNode('name', "Secure Keystore")
@@ -105,5 +108,9 @@ publishing {
       }
       artifact("build/outputs/aar/${artifactId}-${version}-release.aar")
     }
+  }
+  signing {
+    useGpgCmd()
+    sign publishing.publications.aar
   }
 }
