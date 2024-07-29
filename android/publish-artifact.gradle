@@ -11,6 +11,9 @@ publishing {
   }
   publications {
     aar(MavenPublication) {
+      afterEvaluate {
+        from components.findByName('release')
+      }
       pom {
         withXml {
           asNode().appendNode('name', "Secure Keystore")
@@ -86,11 +89,6 @@ publishing {
           def gpgArgumentsNode = gpgConfigurationNode.appendNode('gpgArguments')
           gpgArgumentsNode.appendNode('arg', '--pinentry-mode')
           gpgArgumentsNode.appendNode('arg', 'loopback')
-
-          def profilesNode = asNode().appendNode('profiles').appendNode('profile')
-          def activationNode = profilesNode.appendNode('activation')
-          activationNode.appendNode('activeByDefault', 'false');
-
         }
       }
       groupId = "io.mosip"
@@ -105,5 +103,9 @@ publishing {
       }
       artifact("build/outputs/aar/${artifactId}-${version}-release.aar")
     }
+  }
+  signing {
+    useGpgCmd()
+    sign publishing.publications.aar
   }
 }
