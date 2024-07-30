@@ -11,9 +11,6 @@ publishing {
   }
   publications {
     aar(MavenPublication) {
-      afterEvaluate {
-        from components.findByName('release')
-      }
       pom {
         withXml {
           asNode().appendNode('name', "Secure Keystore")
@@ -91,8 +88,6 @@ publishing {
           gpgArgumentsNode.appendNode('arg', 'loopback')
 
           def profilesNode = asNode().appendNode('profiles').appendNode('profile')
-          def activationNode = profilesNode.appendNode('activation')
-          activationNode.appendNode('activeByDefault', 'false');
           def propertiesNode = profilesNode.appendNode('properties')
           propertiesNode.appendNode('gpg.executable', 'gpg2')
           propertiesNode.appendNode('gpg.passphrase', System.getenv("GPG_SECRET"))
@@ -111,9 +106,5 @@ publishing {
       }
       artifact("build/outputs/aar/${artifactId}-${version}-release.aar")
     }
-  }
-  signing {
-    useGpgCmd()
-    sign publishing.publications.aar
   }
 }
