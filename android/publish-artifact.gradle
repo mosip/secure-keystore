@@ -1,0 +1,62 @@
+publishing {
+  repositories {
+    maven {
+      url = System.getenv("OSSRH_URL")
+      name = "secure-keystore"
+      credentials {
+        username = System.getenv("OSSRH_USER")
+        password = System.getenv("OSSRH_SECRET")
+      }
+    }
+  }
+  publications {
+    aar(MavenPublication) {
+      afterEvaluate {
+        from components.release
+      }
+
+
+      groupId = 'io.mosip'
+      artifactId = 'secure-keystore'
+      version = '0.2.0'
+
+      pom.withXml {
+        def root = asNode()
+        root.appendNode('name', 'Secure Keystore')
+        root.appendNode('description', 'Library to create and store keys in android hardware keystore and helps to do encryption, decryption, and hmac calculation')
+        root.appendNode('url', 'https://github.com/mosip/secure-keystore')
+
+        def licensesNode = root.appendNode('licenses')
+        licensesNode.appendNode('license').with {
+          appendNode('name', 'MIT License')
+          appendNode('url', 'https://opensource.org/licenses/MIT')
+        }
+
+        def scmNode = root.appendNode('scm')
+        scmNode.appendNode('connection', 'scm:git:git://github.com/mosip/secure-keystore.git')
+        scmNode.appendNode('developerConnection', 'scm:git:ssh://github.com:mosip/secure-keystore.git')
+        scmNode.appendNode('url', 'https://github.com/mosip/secure-keystore')
+
+        def developersNode = root.appendNode('developers')
+        developersNode.appendNode('developer').with {
+          appendNode('id', 'mosip-developer')
+          appendNode('name', 'Mosip Developer')
+          appendNode('email', 'mosip.emailnotifier@gmail.com')
+          appendNode('organization', 'IO Mosip')
+          appendNode('organizationUrl', 'https://mosip.io')
+        }
+      }
+    }
+  }
+  signing {
+    useGpgCmd()
+    sign publishing.publications.aar
+    signatory {
+      keyId = System.getenv("KEY_ID")
+    }
+  }
+}
+
+
+
+

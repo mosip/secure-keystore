@@ -1,0 +1,158 @@
+name: Maven build
+
+on:
+  workflow_dispatch:
+    inputs:
+      SERVICE_LOCATION:
+        description: 'Service location'
+        required: true
+        type: string
+      ANDROID_SERVICE_LOCATION:
+        description: "Android Service Location"
+        required: true
+        default: "android"
+        type: string
+      JAVA_VERSION:
+        description: "Java Version"
+        required: false
+        default: 11
+        type: number
+    secrets:
+      OSSRH_USER:
+        required: true
+      OSSRH_SECRET:
+        required: true
+      OSSRH_URL:
+        required: true
+      OSSRH_TOKEN:
+        required: true
+      GPG_SECRET:
+        required: true
+      SLACK_WEBHOOK_URL:
+        required: true
+
+jobs:
+  maven-android-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Set up JDK
+        uses: actions/setup-java@v3
+        with:
+          distribution: adopt
+          java-version: ${{ inputs.JAVA_VERSION }}
+          server-id: ossrh # Value of the distributionManagement/repository/id field of the pom.xml
+          settings-path: ${{ github.workspace }} # location for the settings.xml file
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: '16'
+
+      - name: Cache Gradle packages
+        uses: actions/cache@v3.3.1
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Cache npm dependencies
+        uses: actions/cache@v2
+        with:
+          path: '~/.npm'
+          key: ${{ runner.os }}-npm-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-npm-
+
+      - name: Install npm dependencies
+        run: |
+          cd ${{ inputs.SERVICE_LOCATION }}
+          npm install -g yarn # Install yarn globally if you're using yarn
+          yarn install # or `npm install` if using npm
+
+      - name: Cache local Maven repository
+        uses: actions/cache@v3
+        with:
+          path: ~/.m2/repository
+          key: ${{ runner.os }}-maven-${{ hashFiles('**/pom.xml') }}
+          restore-keys: |
+            ${{ runner.os }}-maven-
+
+      - name: Setup branch and env
+        run: |
+          # Strip git ref prefix from version
+          echo "BRANCH_NAME=$(echo ${{ github.ref }} | sed -e 's,.*/\(.*\),\1,')" >> $GITHUB_ENV
+          echo "GPG_TTY=$(tty)" >> $GITHUB_ENV
+
+      - name: Setup branch and GPG public key
+        run: |
+          sudo apt-get --yes install gnupg2
+          gpg2 --import ./.github/keys/mosipgpgkey_pub.gpg
+          echo "${{ secrets.GPG_SECRET }}" | gpg --batch --yes --passphrase-fd 0 --import ./.github/keys/mosipgpgkey_sec.gpg
+          KEY_ID=$(gpg --list-secret-keys --keyid-format LONG | grep sec | awk '{print $2}' | awk -F'/' '{print $2}')
+          echo "KEY_ID=$KEY_ID" >> $GITHUB_ENV
+
+      - name: Install xmlstartlet and xmllint
+        run: |
+          sudo rm /etc/apt/sources.list.d/microsoft-prod.list
+          sudo apt-get update
+          sudo apt-get install xmlstarlet libxml2-utils
+
+      - name: Setup the settings file for ossrh server
+        run: echo "<settings> <servers> <server> <id>ossrh</id> <username>${{secrets.OSSRH_USER}}</username> <password>${{secrets.OSSRH_SECRET}}</password> </server> </servers> <profiles> <profile> <id>ossrh</id> <activation> <activeByDefault>true</activeByDefault> </activation> <properties> <gpg.executable>gpg2</gpg.executable> <gpg.passphrase>${{secrets.GPG_SECRET}}</gpg.passphrase> </properties> </profile> <profile> <id>allow-snapshots</id> <activation><activeByDefault>true</activeByDefault></activation> <repositories> <repository> <id>snapshots-repo</id> <url>https://oss.sonatype.org/content/repositories/snapshots</url> <releases><enabled>false</enabled></releases> <snapshots><enabled>true</enabled></snapshots> </repository> <repository> <id>releases-repo</id> <url>https://oss.sonatype.org/service/local/staging/deploy/maven2</url> <releases><enabled>true</enabled></releases> <snapshots><enabled>false</enabled></snapshots> </repository> <repository> <id>danubetech-maven-public</id> <url>https://repo.danubetech.com/repository/maven-public/</url> </repository> </repositories> </profile> <profile> <id>sonar</id> <properties> <sonar.sources>.</sonar.sources> <sonar.host.url>https://sonarcloud.io</sonar.host.url> </properties> <activation> <activeByDefault>false</activeByDefault> </activation> </profile> </profiles> </settings>" > $GITHUB_WORKSPACE/settings.xml
+
+      - name: Build check for MOSIP License
+        run: |
+          cd ${{ inputs.SERVICE_LOCATION }}/${{ inputs.ANDROID_SERVICE_LOCATION }}
+          chmod +x ./gradlew
+          ./gradlew generatePom
+          xmlstarlet select -N s="http://maven.apache.org/POM/4.0.0" -t -v "//s:project/s:licenses[1]/s:license/s:name" -nl build/publications/aar/pom-default.xml | grep -q "MIT"
+
+      - name: Build check for developer
+        run: |
+          cd ${{ inputs.SERVICE_LOCATION }}/${{ inputs.ANDROID_SERVICE_LOCATION }}
+          ./gradlew generatePom
+          xmlstarlet select -N s="http://maven.apache.org/POM/4.0.0" -t -v "//s:project/s:developers[1]/s:developer/s:name" -nl build/publications/aar/pom-default.xml | grep -icq "Mosip"
+
+      - name: Build check for commit plugin
+        run: cd ${{ inputs.SERVICE_LOCATION }}/${{ inputs.ANDROID_SERVICE_LOCATION }} && xmlstarlet select -N s="http://maven.apache.org/POM/4.0.0" -t -v "//s:project/s:build/s:plugins/s:plugin[s:groupId='pl.project13.maven']/s:artifactId" -nl build/publications/aar/pom-default.xml | grep -q "git-commit-id-plugin"
+
+      - name: Build check for sign plugin
+        run: cd ${{ inputs.SERVICE_LOCATION }}/${{ inputs.ANDROID_SERVICE_LOCATION }} && xmlstarlet sel -N s="http://maven.apache.org/POM/4.0.0" -t -v "//s:project/s:build/s:plugins/s:plugin[s:groupId='org.apache.maven.plugins']/s:artifactId" -nl build/publications/aar/pom-default.xml | grep -q "maven-gpg-plugin"
+
+      - name: Log pom.xml
+        run: cat ${{ inputs.SERVICE_LOCATION }}/${{ inputs.ANDROID_SERVICE_LOCATION }}/build/publications/aar/pom-default.xml
+
+      - name: Validate pom.xml & settings.xml via xmllint
+        run: |
+          find ${{ inputs.SERVICE_LOCATION }}/${{ inputs.ANDROID_SERVICE_LOCATION }}/build/publications/aar -type f -name pom-default.xml | while read -r F; do
+            xmllint --xpath '/*[local-name()="project"]/*[local-name()="version"]' $F
+          done
+
+      - name: Build with Gradlew
+        run: |
+          cd ${{ inputs.SERVICE_LOCATION }}/${{ inputs.ANDROID_SERVICE_LOCATION }}
+          ./gradlew assembleRelease
+
+      - name: Publish to Maven Central
+        env:
+          OSSRH_USER: ${{secrets.OSSRH_USER}}
+          OSSRH_SECRET: ${{secrets.OSSRH_SECRET}}
+          OSSRH_URL: ${{secrets.OSSRH_URL}}
+          GPG_SECRET: ${{secrets.GPG_SECRET}}
+          KEY_ID: ${{ env.KEY_ID }}
+        run: |
+          cd ${{ inputs.SERVICE_LOCATION }}/${{ inputs.ANDROID_SERVICE_LOCATION }}
+          ./gradlew publish
+
+      - name: Publish to Slack
+        uses: 8398a7/action-slack@v3
+        with:
+          status: ${{ job.status }}
+          fields: repo,message,author,commit,workflow,job # selectable (default: repo,message)
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }} # required
+        if: "${{ github.event_name != 'pull_request' && failure() }}" # Pick up events even if the job fails or is canceled.
