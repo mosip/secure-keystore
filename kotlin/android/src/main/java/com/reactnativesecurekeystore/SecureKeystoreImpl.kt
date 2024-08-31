@@ -1,5 +1,6 @@
 package com.reactnativesecurekeystore
 
+import android.content.Context
 import android.util.Log
 import androidx.biometric.BiometricPrompt.CryptoObject
 import com.reactnativesecurekeystore.biometrics.Biometrics
@@ -10,15 +11,18 @@ import com.reactnativesecurekeystore.exception.InvalidEncryptionText
 import com.reactnativesecurekeystore.exception.KeyNotFound
 import kotlinx.coroutines.runBlocking
 import java.security.Key
+import java.security.KeyPair
 import java.security.KeyStore
 import java.security.PrivateKey
+import java.security.PublicKey
 import javax.crypto.SecretKey
-import android.content.Context
+
 
 class SecureKeystoreImpl(
-  private val keyGenerator: KeyGenerator,
-  private val cipherBox: CipherBox,
-  private val biometrics: Biometrics,
+    private val keyGenerator: KeyGenerator,
+    private val cipherBox: CipherBox,
+    private val biometrics: Biometrics,
+    private val preferences: Preferences,
 ) : SecureKeystore {
     private var ks: KeyStore = KeyStore.getInstance(KEYSTORE_TYPE)
     private val logTag = getLogTag(javaClass.simpleName)
@@ -34,18 +38,32 @@ class SecureKeystoreImpl(
 
     /** Generate a new key pair */
     override fun generateKeyPair(
-      alias: String,
-      isAuthRequired: Boolean,
-      authTimeout: Int?,
+        type: String,
+        alias: String,
+        isAuthRequired: Boolean,
+        authTimeout: Int?,
     ): String {
-        val keyPair = keyGenerator.generateKeyPair(alias, isAuthRequired, authTimeout)
+        val keyPair: KeyPair
+        keyPair = if (type == "RS256") {
+            keyGenerator.generateKeyPair(alias, isAuthRequired, authTimeout)
+        } else if (type=="ES256")
+            keyGenerator.generateKeyPairEC(alias, isAuthRequired, authTimeout)
+        else
+            throw KeyNotFound("Given key type $type is not supported")
         return PemConverter(keyPair.public).toPem()
     }
 
-    override fun generateKeyPairEC(
-      alias: String,
-      isAuthRequired: Boolean,
-      authTimeout: Int?,
+    override fun retrieveKey(
+        alias: String,
+    ): String {
+        val publicKey = ks.getCertificate(alias).publicKey
+        return PemConverter(publicKey).toPem()
+    }
+
+    fun generateKeyPairEC(
+        alias: String,
+        isAuthRequired: Boolean,
+        authTimeout: Int?,
     ): String {
         val keyPair = keyGenerator.generateKeyPairEC(alias, isAuthRequired, authTimeout)
         Log.d("keytest", PemConverter(keyPair.public).toPem())
@@ -71,11 +89,11 @@ class SecureKeystoreImpl(
     }
 
     override fun encryptData(
-      alias: String,
-      data: String,
-      onSuccess: (encryptedText: String) -> Unit,
-      onFailure: (code: Int, message: String) -> Unit,
-      context: Context,
+        alias: String,
+        data: String,
+        onSuccess: (encryptedText: String) -> Unit,
+        onFailure: (code: Int, message: String) -> Unit,
+        context: Context,
     ) {
         try {
             val key = getKeyOrThrow(alias)
@@ -99,10 +117,10 @@ class SecureKeystoreImpl(
     }
 
     override fun decryptData(
-      alias: String, encryptedText: String,
-      onSuccess: (data: String) -> Unit,
-      onFailure: (code: Int, message: String) -> Unit,
-      context: Context,
+        alias: String, encryptedText: String,
+        onSuccess: (data: String) -> Unit,
+        onFailure: (code: Int, message: String) -> Unit,
+        context: Context,
     ) {
         try {
             val key = getKeyOrThrow(alias)
@@ -130,10 +148,10 @@ class SecureKeystoreImpl(
     }
 
     override fun sign(
-      signAlgorithm: String,
-      alias: String, data: String,
-      onSuccess: (signature: String) -> Unit, onFailure: (code: Int, message: String) -> Unit,
-      context: Context,
+        signAlgorithm: String,
+        alias: String, data: String,
+        onSuccess: (signature: String) -> Unit, onFailure: (code: Int, message: String) -> Unit,
+        context: Context,
     ) {
         try {
             val key = getKeyOrThrow(alias) as PrivateKey
@@ -161,9 +179,9 @@ class SecureKeystoreImpl(
     }
 
     override fun generateHmacSha(
-      alias: String, data: String,
-      onSuccess: (sha: String) -> Unit,
-      onFailure: (code: Int, message: String) -> Unit,
+        alias: String, data: String,
+        onSuccess: (sha: String) -> Unit,
+        onFailure: (code: Int, message: String) -> Unit,
     ) {
         try {
             val key = getKeyOrThrow(alias) as SecretKey
@@ -194,5 +212,23 @@ class SecureKeystoreImpl(
         } catch (e: Exception) {
             e.printStackTrace()
         }
+    }
+
+    override fun retrieveGenericKey(account: String): List<String> {
+        val privateKey= preferences.getPreference("${account}_privateKey", "")
+        val publicKey= preferences.getPreference("${account}_public_Key", "")
+        val keyPair=ArrayList<String>()
+        keyPair.add(privateKey)
+        keyPair.add(publicKey)
+        return keyPair
+    }
+
+    override fun storeGenericKey(
+        privateKey: String,
+        publicKey: String,
+        account: String,
+    ) {
+        preferences.savePreference("${account}_privateKey",privateKey)
+        preferences.savePreference("${account}_publicKey",publicKey)
     }
 }

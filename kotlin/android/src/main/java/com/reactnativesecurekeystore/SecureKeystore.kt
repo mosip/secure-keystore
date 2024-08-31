@@ -1,11 +1,11 @@
 package com.reactnativesecurekeystore
 
 import android.content.Context;
+import java.security.PrivateKey
 
 interface SecureKeystore {
     fun hasAlias(alias: String): Boolean
-    fun generateKeyPair(alias: String, isAuthRequired: Boolean, authTimeout: Int?): String
-    fun generateKeyPairEC(alias: String, isAuthRequired: Boolean, authTimeout: Int?): String
+    fun generateKeyPair(type:String, alias: String, isAuthRequired: Boolean, authTimeout: Int?): String
     fun generateKey(alias: String, isAuthRequired: Boolean, authTimeout: Int?)
     fun removeKey(alias: String)
 
@@ -41,5 +41,10 @@ interface SecureKeystore {
 
     fun generateHmacSha256Key(alias: String)
 
+    fun retrieveGenericKey(account: String): List<String>
+
     fun removeAllKeys()
+    fun storeGenericKey(publicKey: String,privateKey: String,account: String)
+
+    fun retrieveKey(alias: String):String
 }
