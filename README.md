@@ -1,7 +1,5 @@
-# secure-keystore
-A module to create and store keys in android hardware keystore and helps to do encryption, decryption, and hmac calculation.
-
-`note: This library only supported for android.`
+# Secure-Keystore
+A module to create and store keys in the Android hardware keystore, which helps with encryption, decryption, and HMAC calculation.
 
 ## Usage as a Kotlin library (for native android)
 The secure-keystore kotlin artifact (.aar) has been published to Maven.
@@ -17,15 +15,17 @@ The secure-keystore kotlin artifact (.aar) has been published to Maven.
        }
      }
   ```
-- In your app's build.gradle.kts add the following:
-  ```kotlin
-     dependencies {
-           implementation("io.mosip:secure-keystore:1.0-SNAPSHOT")
-     }
-  ```
- The kotlin library has been added to your project.
 
-## Usage as a React-Native wrapper
+- In your app's `build.gradle.kts`, add the following:
+  ```kotlin
+  dependencies {
+    implementation("io.mosip:secure-keystore:1.0-SNAPSHOT")
+  }
+  ```
+
+The Kotlin library has been added to your project.
+
+## Usage as a React-Native Wrapper
 
 ### Installation
 
@@ -35,123 +35,152 @@ npm install @mosip/secure-keystore
 
 ## API Documentation
 
-1. for RSA based Key Pair
-
-```js
-import SecureKeyStore  from "@mosip/secure-keystore";
-
-// ...
-
-if(!SecureKeyStore.deviceSupportsHardware) {
-  return
-}
-
-const alias = "1234ab";
-const data = "any data";
-
-const publicKey = await SecureKeyStore.generateKeyPair(alias);
-
-const signature = await SecureKeyStore.sign(alias, data)
-
-```
-
-
-2. for symmetric key
-
-```js
-import SecureKeyStore  from "@mosip/secure-keystore";
-
-// ...
-
-if(!SecureKeyStore.deviceSupportsHardware) {
-  return
-}
-
-const alias = "1234ab";
-const base64EncodedData = encodeToBase64("any data");
-
-await SecureKeyStore.generateKey(alias);
-
-const encryptedData = await SecureKeyStore.encryptData(alias, base64EncodedData)
-const decryptedData = await SecureKeyStore.decryptData(alias, encryptedData)
-
-```
-
-
-## API documentation
-
 ### deviceSupportsHardware
 
 `deviceSupportsHardware() => boolean`
 
-Check if the device supports hardware key store
+Check if the device supports hardware keystore.
 
+### hasAlias
+
+`hasAlias(alias: String) => boolean`
+
+Check if the given alias is present in the keystore.
 
 ### generateKey
 
-`generateKey(alias: string) => void`
+`generateKey(alias: String, isAuthRequired: boolean, authTimeout?: number) => void`
 
-generates a symmetric key for encryption and decryption
+Generates a symmetric key for encryption and decryption.
 
 ### generateKeyPair
 
-`generateKeyPair(alias: String, isAuthRequired: Boolean, authTimeout: Int?): String`
+`generateKeyPair(type: String, alias: String, isAuthRequired: boolean, authTimeout?: number) => String`
 
-generates a asymmetric RSA key Pair for signing
+Generates an asymmetric RSA or EC (P-256) key pair for signing.
 
-### generateKeyPairEC
+### removeKey
 
-`generateKeyPairEC(alias: String, isAuthRequired: Boolean, authTimeout: Int?): String`
+`removeKey(alias: String) => void`
 
-generates a asymmetric EC(P-256) key Pair for signing.
+Removes a key associated with the alias from the keystore.
 
 ### encryptData
 
-`encryptData(alias: string, data: string) => string`
+```kotlin
+encryptData(
+  alias: String,
+  data: String,
+  onSuccess: (encryptedText: String) -> Unit,
+  onFailure: (code: number, message: String) -> Unit,
+  context: Context,
+) => void
+```
 
-Encrypts the given data(encoded in base64) using the key that is assigned to the alias. Returns back encrypted data as a string
+Encrypts the given data (encoded in Base64) using the key assigned to the alias. Returns the encrypted data as a String through the `onSuccess` callback.
 
 ### decryptData
 
-`decryptData(alias: string, encryptionText: string) => string`
+```kotlin
+decryptData(
+  alias: String,
+  encryptedText: String,
+  onSuccess: (data: String) -> Unit,
+  onFailure: (code: number, message: String) -> Unit,
+  context: Context,
+) => void
+```
 
-Decrypts the given encryptionText using the key that is assigned to the alias. Returns back the data as a string
+Decrypts the given `encryptedText` using the key assigned to the alias. Returns the decrypted data as a String through the `onSuccess` callback.
 
 ### sign
 
-`sign(signature: Signature, data: String, signAlgorithm: String): String`
+```kotlin
+sign(
+  signAlgorithm: String,
+  alias: String,
+  data: String,
+  onSuccess: (signature: String) -> Unit,
+  onFailure: (code: number, message: String) -> Unit,
+  context: Context,
+) => void
+```
 
-Create a signature for the given data, and signing algorithm using the key that is assigned to the alias. Returns back the signature as a string
-For `SHA256withECDSA` as `signAlgorithm` the output is in standard ASN1 format.In case of certain verifiers like jwt.io conversion to RS format is necessary.
+Creates a signature for the given data and signing algorithm using the key assigned to the alias. Returns the signature as a String through the `onSuccess` callback.
+
+> For `SHA256withECDSA` as `signAlgorithm`, the output is in standard ASN.1 format. In the case of certain verifiers like jwt.io, conversion to RS format is necessary.
 
 ```kotlin
- private fun convertDerToRsFormat(derSignature: ByteArray): ByteArray {
-     val asn1InputStream = ASN1InputStream(ByteArrayInputStream(derSignature))
-     val seq = asn1InputStream.readObject() as ASN1Sequence
-     val r = (seq.getObjectAt(0) as ASN1Integer).value
-     val s = (seq.getObjectAt(1) as ASN1Integer).value
+private fun convertDerToRsFormat(derSignature: ByteArray): ByteArray {
+    val asn1InputStream = ASN1InputStream(ByteArrayInputStream(derSignature))
+    val seq = asn1InputStream.readObject() as ASN1Sequence
+    val r = (seq.getObjectAt(0) as ASN1Integer).value
+    val s = (seq.getObjectAt(1) as ASN1Integer).value
 
-     val rBytes = r.toByteArray()
-     val sBytes = s.toByteArray()
+    val rBytes = r.toByteArray()
+    val sBytes = s.toByteArray()
 
-     val rPadded = ByteArray(32)
-     val sPadded = ByteArray(32)
+    val rPadded = ByteArray(32)
+    val sPadded = ByteArray(32)
 
-     val rTrimmed = if (rBytes.size > 32) rBytes.copyOfRange(rBytes.size - 32, rBytes.size) else rBytes
-     val sTrimmed = if (sBytes.size > 32) sBytes.copyOfRange(sBytes.size - 32, sBytes.size) else sBytes
+    val rTrimmed = if (rBytes.size > 32) rBytes.copyOfRange(rBytes.size - 32, rBytes.size) else rBytes
+    val sTrimmed = if (sBytes.size > 32) sBytes.copyOfRange(sBytes.size - 32, sBytes.size) else sBytes
 
-     System.arraycopy(rTrimmed, 0, rPadded, 32 - rTrimmed.size, rTrimmed.size)
-     System.arraycopy(sTrimmed, 0, sPadded, 32 - sTrimmed.size, sTrimmed.size)
+    System.arraycopy(rTrimmed, 0, rPadded, 32 - rTrimmed.size, rTrimmed.size)
+    System.arraycopy(sTrimmed, 0, sPadded, 32 - sTrimmed.size, sTrimmed.size)
 
-     return rPadded + sPadded
-   }
+    return rPadded + sPadded
+}
 ```
-### hasAlias
 
-`hasAlias(alias: string) => boolean`
+### generateHmacSha
 
-Check if the given alias is present in the key store
+```kotlin
+generateHmacSha(
+    alias: String,
+    data: String,
+    onSuccess: (signature: String) -> Unit,
+    onFailure: (code: number, message: String) -> Unit,
+) => void
+```
 
+Generates an HMAC signature for the given data using the key assigned to the alias. Returns the signature as a String through the `onSuccess` callback.
+
+### generateHmacSha256Key
+
+`generateHmacSha256Key(alias: String) => void`
+
+Generates a symmetric key specifically for HMAC-SHA256 operations.
+
+### retrieveGenericKey
+
+`retrieveGenericKey(account: String) => String[]`
+
+Retrieves a list of keys associated with the specified account.
+
+### storeGenericKey
+
+```kotlin
+storeGenericKey(
+  publicKey: String,
+  privateKey: String,
+  account: String,
+) => void
+```
+
+Stores the specified public and private key pair associated with the account.
+
+### retrieveKey
+
+`retrieveKey(alias: String) => String`
+
+Retrieves the key associated with the alias.
+
+### removeAllKeys
+
+`removeAllKeys() => void`
+
+Removes all keys stored in the keystore.
 
 ## Contributing
 
@@ -160,6 +189,3 @@ See the [contributing guide](CONTRIBUTING.md) to learn how to contribute to the 
 ## License
 
 MPL-2.0
-
----
-
