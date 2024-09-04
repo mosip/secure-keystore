@@ -216,7 +216,7 @@ class SecureKeystoreImpl(
 
     override fun retrieveGenericKey(account: String): List<String> {
         val privateKey= preferences.getPreference("${account}_privateKey", "")
-        val publicKey= preferences.getPreference("${account}_public_Key", "")
+        val publicKey= preferences.getPreference("${account}_publicKey", "")
         val keyPair=ArrayList<String>()
         keyPair.add(privateKey)
         keyPair.add(publicKey)
@@ -224,8 +224,8 @@ class SecureKeystoreImpl(
     }
 
     override fun storeGenericKey(
-        privateKey: String,
         publicKey: String,
+        privateKey: String,
         account: String,
     ) {
         preferences.savePreference("${account}_privateKey",privateKey)
