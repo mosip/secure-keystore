@@ -20,7 +20,7 @@ on:
       - develop*
       - MOSIP*
 jobs:
-  build-secure-keystore-js:
+  build-secure-keystore:
     uses: mosip/kattu/.github/workflows/npm-android-build.yml@master
     with:
       SERVICE_LOCATION: 'js'
