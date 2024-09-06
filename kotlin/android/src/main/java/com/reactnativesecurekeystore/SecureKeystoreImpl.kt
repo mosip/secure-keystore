@@ -9,6 +9,7 @@ import com.reactnativesecurekeystore.common.Util.Companion.getLogTag
 import com.reactnativesecurekeystore.dto.EncryptedOutput
 import com.reactnativesecurekeystore.exception.InvalidEncryptionText
 import com.reactnativesecurekeystore.exception.KeyNotFound
+import com.reactnativesecurekeystore.common.Util;
 import kotlinx.coroutines.runBlocking
 import java.security.Key
 import java.security.KeyPair
@@ -215,8 +216,8 @@ class SecureKeystoreImpl(
     }
 
     override fun retrieveGenericKey(account: String): List<String> {
-        val privateKey= preferences.getPreference("${account}_privateKey", "")
-        val publicKey= preferences.getPreference("${account}_public_Key", "")
+        val privateKey= preferences.getPreference(Util.getPrivateKeyId(account), "")
+        val publicKey= preferences.getPreference(Util.getPublicKeyId(account), "")
         val keyPair=ArrayList<String>()
         keyPair.add(privateKey)
         keyPair.add(publicKey)
@@ -224,11 +225,11 @@ class SecureKeystoreImpl(
     }
 
     override fun storeGenericKey(
-        privateKey: String,
         publicKey: String,
+        privateKey: String,
         account: String,
     ) {
-        preferences.savePreference("${account}_privateKey",privateKey)
-        preferences.savePreference("${account}_publicKey",publicKey)
+        preferences.savePreference(Util.getPublicKeyId(account),publicKey)
+        preferences.savePreference(Util.getPrivateKeyId(account),privateKey)
     }
 }

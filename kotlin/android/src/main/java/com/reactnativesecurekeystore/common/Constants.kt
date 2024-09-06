@@ -9,3 +9,6 @@ const val CHECK_HARDWARE_SUPPORT_KEY_ALIAS = "$KEYSTORE_TYPE#checkHardwareSuppor
 
 /** Key size. */
 const val ENCRYPTION_KEY_SIZE = 256
+
+const val PUBLIC_KEY_STORING_ID = "_publicKey"
+const val PRIVATE_KEY_STORING_ID = "_privateKey"
