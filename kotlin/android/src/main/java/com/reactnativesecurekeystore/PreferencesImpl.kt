@@ -32,4 +32,8 @@ class PreferencesImpl(context: Context):Preferences {
   override  fun clearPreferences() {
         preferences.edit().clear().apply()
     }
+
+    override fun hasAlias(alias:String):Boolean{
+        return preferences.contains(alias)
+    }
 }
