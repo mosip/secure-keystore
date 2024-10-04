@@ -2,7 +2,9 @@ package com.reactnativesecurekeystore
 
 import android.content.Context
 import android.util.Log
+import androidx.biometric.BiometricPrompt
 import androidx.biometric.BiometricPrompt.CryptoObject
+import androidx.fragment.app.FragmentActivity
 import com.reactnativesecurekeystore.biometrics.Biometrics
 import com.reactnativesecurekeystore.common.PemConverter
 import com.reactnativesecurekeystore.common.Util.Companion.getLogTag
@@ -15,9 +17,17 @@ import java.security.Key
 import java.security.KeyPair
 import java.security.KeyStore
 import java.security.PrivateKey
+import java.util.concurrent.CountDownLatch;
 import java.security.PublicKey
 import javax.crypto.SecretKey
+import kotlin.coroutines.resumeWithException
+import kotlin.coroutines.suspendCoroutine
+import java.util.concurrent.Executors
+import kotlin.coroutines.resume
 
+const val BIOMETRIC_AUTH_TITLE = "Unlock App"
+const val BIOMETRIC_AUTH_SUBTITLE = "Please use fingerprint to unlock the app"
+const val BIOMETRIC_AUTH_CANCEL = "Cancel"
 
 class SecureKeystoreImpl(
     private val keyGenerator: KeyGenerator,
@@ -47,7 +57,7 @@ class SecureKeystoreImpl(
         val keyPair: KeyPair
         keyPair = if (type == "RS256") {
             keyGenerator.generateKeyPair(alias, isAuthRequired, authTimeout)
-        } else if (type=="ES256")
+        } else if (type == "ES256")
             keyGenerator.generateKeyPairEC(alias, isAuthRequired, authTimeout)
         else
             throw KeyNotFound("Given key type $type is not supported")
@@ -67,7 +77,6 @@ class SecureKeystoreImpl(
         authTimeout: Int?,
     ): String {
         val keyPair = keyGenerator.generateKeyPairEC(alias, isAuthRequired, authTimeout)
-        Log.d("keytest", PemConverter(keyPair.public).toPem())
         return PemConverter(keyPair.public).toPem()
     }
 
@@ -86,7 +95,10 @@ class SecureKeystoreImpl(
 
     override fun hasAlias(alias: String): Boolean {
         ks.load(null)
-        return ks.containsAlias(alias)
+        if (ks.containsAlias(alias))
+            return true
+
+        return preferences.hasAlias(Util.getPublicKeyId(alias))
     }
 
     override fun encryptData(
@@ -215,21 +227,91 @@ class SecureKeystoreImpl(
         }
     }
 
-    override fun retrieveGenericKey(account: String): List<String> {
-        val privateKey= preferences.getPreference(Util.getPrivateKeyId(account), "")
-        val publicKey= preferences.getPreference(Util.getPublicKeyId(account), "")
-        val keyPair=ArrayList<String>()
-        keyPair.add(privateKey)
-        keyPair.add(publicKey)
-        return keyPair
+    override fun retrieveGenericKey(account: String, context: Any): List<String> {
+        try {
+            val privateKeyAlias = Util.getPrivateKeyId(account)
+            val publicKeyAlias = Util.getPublicKeyId(account)
+
+            val keyPair = ArrayList<String>()
+
+            val fragmentActivity = context as? FragmentActivity
+                ?: throw IllegalArgumentException("Context must be a FragmentActivity for biometric authentication")
+            if (account == "ES256K" || account == "ED25519") {
+
+                val success = authenticateBiometricallyBlocking(fragmentActivity, privateKeyAlias)
+
+                if (success) {
+                    val privateKey = preferences.getPreference(privateKeyAlias, "")
+                    val publicKey = preferences.getPreference(publicKeyAlias, "")
+                    keyPair.add(privateKey)
+                    keyPair.add(publicKey)
+                } else {
+                    Log.e("SecureKeystore", "Biometric authentication failed")
+                }
+            } else {
+                val privateKey = preferences.getPreference(privateKeyAlias, "")
+                val publicKey = preferences.getPreference(publicKeyAlias, "")
+                keyPair.add(privateKey)
+                keyPair.add(publicKey)
+            }
+            return keyPair
+        } catch (e: Exception) {
+            Log.e(
+                "SecureKeystore",
+                "Error during biometric authentication or retrieving key-data: ${e.message}"
+            )
+            throw Exception(e.message)
+        }
     }
+
+
+    private fun authenticateBiometricallyBlocking(activity: FragmentActivity, keyAlias: String): Boolean {
+        val latch = CountDownLatch(1)
+        var success = false
+
+        activity.runOnUiThread {
+            val promptInfo = BiometricPrompt.PromptInfo.Builder()
+                .setTitle(BIOMETRIC_AUTH_TITLE)
+                .setSubtitle(BIOMETRIC_AUTH_SUBTITLE)
+                .setNegativeButtonText(BIOMETRIC_AUTH_CANCEL)
+                .build()
+
+            val biometricPrompt = BiometricPrompt(
+                activity,
+                Executors.newSingleThreadExecutor(),
+                object : BiometricPrompt.AuthenticationCallback() {
+                    override fun onAuthenticationSucceeded(result: BiometricPrompt.AuthenticationResult) {
+                        success = true
+                        latch.countDown()
+                    }
+
+                    override fun onAuthenticationError(errorCode: Int, errString: CharSequence) {
+                        success = false
+                        latch.countDown()
+                    }
+
+                    override fun onAuthenticationFailed() {
+                        success = false
+                        latch.countDown()
+                    }
+                }
+            )
+
+            biometricPrompt.authenticate(promptInfo)
+        }
+
+        latch.await()
+
+        return success
+    }
+
 
     override fun storeGenericKey(
         publicKey: String,
         privateKey: String,
         account: String,
     ) {
-        preferences.savePreference(Util.getPublicKeyId(account),publicKey)
-        preferences.savePreference(Util.getPrivateKeyId(account),privateKey)
+        preferences.savePreference(Util.getPublicKeyId(account), publicKey)
+        preferences.savePreference(Util.getPrivateKeyId(account), privateKey)
     }
 }

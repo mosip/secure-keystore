@@ -6,4 +6,6 @@ interface Preferences {
     fun savePreference(key: String, value: String)
     fun clearPreferences()
 
+    fun hasAlias(alias: String):Boolean
+
 }

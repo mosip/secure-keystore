@@ -41,7 +41,7 @@ interface SecureKeystore {
 
     fun generateHmacSha256Key(alias: String)
 
-    fun retrieveGenericKey(account: String): List<String>
+    fun  retrieveGenericKey(account: String, context: Any): List<String>
 
     fun removeAllKeys()
     fun storeGenericKey(publicKey: String,privateKey: String,account: String)
