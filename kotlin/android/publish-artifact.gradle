@@ -13,17 +13,20 @@ publishing {
     aar(MavenPublication) {
       pom {
         withXml {
-          def dependenciesNode = asNode().appendNode('dependencies')
-          project.configurations.implementation.allDependencies.each {
-            def dependencyNode = dependenciesNode.appendNode('dependency')
-            dependencyNode.appendNode('groupId', it.group)
-            dependencyNode.appendNode('artifactId', it.name)
-            dependencyNode.appendNode('version', it.version)
-          }
+          asNode().appendNode('name', "Secure Keystore")
+          asNode().appendNode('url', "https://github.com/mosip/secure-keystore")
+          asNode().appendNode('description', "Library to create and store keys in android hardware keystore and helps to do encryption, decryption, and hmac calculation")
 
           asNode().appendNode('licenses').appendNode('license').with {
             appendNode('name', 'MPL-2.0')
             appendNode('url', 'https://www.mozilla.org/en-US/MPL/2.0/')
+          }
+
+          asNode().appendNode('scm').with {
+            appendNode('connection', 'scm:git:git://github.com/mosip/secure-keystore.git')
+            appendNode('developerConnection', 'scm:git:ssh://github.com:mosip/secure-keystore.git')
+            appendNode('url', "https://github.com/mosip/secure-keystore")
+            appendNode('tag', "HEAD")
           }
 
           asNode().appendNode('developers').appendNode('developer').with {
@@ -32,6 +35,14 @@ publishing {
             appendNode('email', 'mosip.emailnotifier@gmail.com')
             appendNode('organization', 'io.mosip')
             appendNode('organizationUrl', 'https://github.com/mosip/secure-keystore')
+          }
+
+          def dependenciesNode = asNode().appendNode('dependencies')
+          project.configurations.implementation.allDependencies.each {
+            def dependencyNode = dependenciesNode.appendNode('dependency')
+            dependencyNode.appendNode('groupId', it.group)
+            dependencyNode.appendNode('artifactId', it.name)
+            dependencyNode.appendNode('version', it.version)
           }
 
           def pluginsNode = asNode().appendNode('build').appendNode('plugins')
@@ -90,4 +101,8 @@ publishing {
       artifact("build/outputs/aar/${artifactId}-${version}-release.aar")
     }
   }
+}
+signing {
+  useGpgCmd()
+  sign publishing.publications.aar
 }
